@@ -259,9 +259,9 @@ export function BlurScene(p: SceneProps) {
       <g transform={`matrix(0.866 -0.5 0 1 ${plO[0]} ${plO[1]})`}>
         <rect width={PW} height={PH} rx="1.6" fill="#f7f5ef" stroke="#1a1815" strokeWidth=".7" />
         <path d={`M0 1.6a1.6 1.6 0 0 1 1.6-1.6H${PW - 1.6}a1.6 1.6 0 0 1 1.6 1.6V${PH * 0.27}H0Z`} fill="#1f4fa8" />
-        <text x={PW / 2} y={PH * 0.22} textAnchor="middle" fontFamily="var(--font-mono)" fontWeight="700" fontSize={PH * 0.17} fill="#fff" letterSpacing=".6">BRASIL</text>
+        <text x={PW / 2} y={PH * 0.22} textAnchor="middle" fontFamily="var(--font-sans)" fontWeight="700" fontSize={PH * 0.17} fill="#fff" letterSpacing=".6">BRASIL</text>
         <rect x={PW - 5} y={PH * 0.06} width="3.6" height={PH * 0.15} fill="#2f9a4f" />
-        <text x={PW / 2} y={PH * 0.9} textAnchor="middle" fontFamily="var(--font-mono)" fontWeight="700" fontSize={PH * 0.6} textLength={PW * 0.86} lengthAdjust="spacingAndGlyphs" fill="#111">BRA2E19</text>
+        <text x={PW / 2} y={PH * 0.9} textAnchor="middle" fontFamily="var(--font-sans)" fontWeight="700" fontSize={PH * 0.6} textLength={PW * 0.86} lengthAdjust="spacingAndGlyphs" fill="#111">BRA2E19</text>
       </g>
 
       {/* o que o app faz: varre, acha e desfoca */}
@@ -277,12 +277,12 @@ export function BlurScene(p: SceneProps) {
           <g key={i}>
             <rect x={h.hx - h.hr * 1.5} y={h.hy - h.hr * 1.5} width={h.hr * 3} height={h.hr * 3} rx="4" />
             <rect x={h.hx - h.hr * 1.5} y={h.hy - h.hr * 1.5 - 15} width="36" height="12" rx="6" fill="#d29a44" stroke="none" />
-            <text x={h.hx - h.hr * 1.5 + 18} y={h.hy - h.hr * 1.5 - 6} textAnchor="middle" fontFamily="var(--font-mono)" fontSize="8" fill="#1a1206" stroke="none">rosto</text>
+            <text x={h.hx - h.hr * 1.5 + 18} y={h.hy - h.hr * 1.5 - 6} textAnchor="middle" fontFamily="var(--font-sans)" fontSize="8" fill="#1a1206" stroke="none">rosto</text>
           </g>
         ))}
         <rect x={plBox.x} y={plBox.y} width={plBox.w} height={plBox.h} rx="3" />
         <rect x={plBox.x} y={plBox.y + plBox.h + 3} width="36" height="12" rx="6" fill="#d29a44" stroke="none" />
-        <text x={plBox.x + 18} y={plBox.y + plBox.h + 12} textAnchor="middle" fontFamily="var(--font-mono)" fontSize="8" fill="#1a1206" stroke="none">placa</text>
+        <text x={plBox.x + 18} y={plBox.y + plBox.h + 12} textAnchor="middle" fontFamily="var(--font-sans)" fontSize="8" fill="#1a1206" stroke="none">placa</text>
       </g>
       <g className="lp-scan">
         <rect x="0" y="0" width="440" height="2" fill="#d29a44" />

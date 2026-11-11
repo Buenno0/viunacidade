@@ -121,13 +121,24 @@ terceiros:
 |---|---|
 | **Anton** 400 (`font-cartaz`, e `font-display` aponta para ela) | todo título: o herói da LP, as chamadas de seção, o nome do app, o título de sheet, a legenda no visualizador |
 | **Instrument Serif** 400 + itálico (`font-serifa`, `.legenda`) | lugar, hora, categoria: o metadado que antes era rótulo mono |
-| pilha do sistema | corpo, botão, campo |
-| **JetBrains Mono** 400/500 (`.num`, e `.rotulo` nas telas internas) | número: relógio, contagem, precisão do GPS |
+| pilha do sistema | corpo, botão, campo, e **todo número da LP** (`tabular-nums` faz o alinhamento sem custo) |
+| **JetBrains Mono** 400/500 (`.num`, e `.rotulo` nas telas internas) | número **do app**: relógio, contagem, precisão do GPS. Sem preload |
 
 **Uma família de título só.** `--font-display` aponta para a mesma Anton do
 cartaz, e por isso a Archivo saiu do projeto: duas famílias de título seriam
-duas vozes. As duas novas somam 42 KB e a saída da Archivo devolveu 35, então
-o app ficou 7 KB mais pesado em fonte e ganhou uma serifa.
+duas vozes.
+
+**Três arquivos, e a LP baixa dois.** São 27 KB na LP (Anton 12 + a itálica
+15) contra os 66 KB de antes do redesign. A medição que levou a isso:
+
+- A Instrument Serif **reta** descia em toda visita e nunca pintava, porque
+  as três classes de serifa são itálicas. Saiu do projeto, 15 KB.
+- A **mono** descia inteira, 31 KB, para servir umas vinte figuras na LP.
+  Perdeu o preload e saiu da LP: hoje ela só desce quando o app desenha o
+  primeiro número, com `swap` cobrindo o instante.
+
+A regra que fica: **fonte baixada só onde pinta.** Antes de declarar uma face,
+confira no `document.fonts` se ela sai de `unloaded`.
 
 O corpo segue na pilha do sistema de propósito: uma terceira família baixada
 custaria mais do que entrega.
@@ -149,8 +160,9 @@ custaria mais do que entrega.
   `/defesa-civil`, que são ferramentas internas: ali o mono denso em caixa alta
   é adequado, e ninguém de fora vê. Se alguma dessas telas virar produto, ela
   migra junto.
-- **Abaixo de 10px, mono.** A serifa itálica some em 9px, então relógio,
-  contagem e selo miúdo usam `.num`. Número é o lugar onde a mono fica.
+- **Abaixo de 10px, nunca serifa.** A itálica some nesse tamanho. No app o
+  miúdo vai para `.num` (mono, que ali já está baixada); na LP vai para a
+  pilha do sistema, que não custa nada.
 - `.num`: mono com `tabular-nums`, para o relógio não dançar quando o minuto vira.
 
 Corpo em 14px (`text-sm`), campos em 16px (`text-base`, evita zoom no iOS).

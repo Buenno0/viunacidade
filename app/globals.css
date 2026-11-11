@@ -423,7 +423,9 @@ body {
   padding: 0 9px;
   border-radius: 9999px;
   box-sizing: border-box;
-  font-family: var(--font-mono);
+  /* Pilha do sistema, não mono: a tag é rótulo de status, não número, e era
+     a última coisa a arrastar a mono inteira para dentro da LP. */
+  font-family: var(--font-sans);
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.14em;
