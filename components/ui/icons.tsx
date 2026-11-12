@@ -179,6 +179,20 @@ export const ChevronIcon = (p: P) => (
   </Icon>
 );
 
+export const StormIcon = (p: P) => (
+  <Icon {...p}>
+    <path d="M6 16.3A5 5 0 1 1 8.6 7a6 6 0 0 1 11.3 3.1A4 4 0 0 1 19 18h-1" />
+    <path d="m13 11-3 5h4l-3 5" />
+  </Icon>
+);
+
+export const SunriseIcon = (p: P) => (
+  <Icon {...p}>
+    <path d="M17 18a5 5 0 0 0-10 0" />
+    <path d="M12 9V3M4.2 10.2l1.4 1.4M2 18h2M20 18h2M18.4 11.6l1.4-1.4M22 22H2" />
+  </Icon>
+);
+
 // Um ícone por categoria, no mesmo traço
 const CATEGORY_PATHS: Record<Category, ReactNode> = {
   transito: (

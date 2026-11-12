@@ -55,7 +55,7 @@ export default function FirstInNeighborhood() {
     <div ref={box} className="flex flex-wrap items-start gap-10">
       <div className="flex min-w-0 flex-[1_1_380px] flex-col gap-5">
         {result ? (
-          <div className="conquista-entra sala-escura flex items-center gap-5" role="status">
+          <div className="conquista-entra sala-escura flex items-center gap-5 rounded-[20px] bg-[#0d1640] p-4 text-ink" role="status">
             <div className="relative">
               {Array.from({ length: 12 }, (_, k) => (
                 <span
@@ -84,7 +84,7 @@ export default function FirstInNeighborhood() {
                 onChange={(e) => setBairro(e.target.value)}
                 placeholder={t.placeholder}
                 autoComplete="off"
-                className="min-h-12 w-full rounded-none border border-line bg-bg px-3.5 text-base text-ink outline-none transition focus:border-accent"
+                className="min-h-12 w-full rounded-xl border border-line bg-bg px-3.5 text-base text-ink outline-none transition focus:border-accent"
               />
               <datalist id="lp-bairros">
                 {BAIRROS.map((b) => (

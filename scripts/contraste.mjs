@@ -2,7 +2,7 @@
 // Contraste WCAG 2.1 dos pares do design system, lidos da fonte única
 // (design/tokens.mjs). Portado do NAS; lá os valores eram copiados à mão.
 // Uso: npm run contraste   (imprime a tabela e sai 1 se algo reprova)
-import { tema } from "../design/tokens.mjs";
+import { ceu, tema } from "../design/tokens.mjs";
 
 const canal = (v) => {
   const s = v / 255;
@@ -34,6 +34,7 @@ const pares = (p) => [
   ["aviso sobre superfície", p.warn, p.surface, 4.5],
   ["perigo sobre superfície", p.danger, p.surface, 4.5],
   ["perigo sobre fundo", p.danger, p.bg, 4.5],
+  ["texto sobre a luz", p.luzInk, p.luz, 4.5],
   ["glifo do marco", p.marcoInk, p.marco, 4.5],
   ["marco como texto sobre superfície", p.marcoTexto, p.surface, 4.5],
   ["marco como texto sobre fundo", p.marcoTexto, p.bg, 4.5],
@@ -68,6 +69,10 @@ const tabela = (titulo, linhas) => {
 tabela("escuro", pares(tema.escuro));
 tabela("claro", pares(tema.claro));
 tabela("sala escura", sala(tema.escuro));
+tabela(
+  "céu da LP (texto branco nas três faixas de cima)",
+  ceu.flatMap(([h, faixas]) => faixas.slice(0, 3).map((c, i) => [`${String(h).padStart(4)}h faixa ${i}`, "#ffffff", c, 4.5])),
+);
 
 console.log(`\n${total - falhas}/${total} pares passando`);
 process.exit(falhas ? 1 : 0);

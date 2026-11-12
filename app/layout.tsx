@@ -1,38 +1,27 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { Manrope, Outfit } from "next/font/google";
 import Providers from "@/components/Providers";
 import { themeBootScript } from "@/lib/theme";
 import { tema } from "@/design/tokens.mjs";
 import "./globals.css";
 
-// Fontes servidas pelo próprio app, sem requisição a terceiros.
+// Fontes servidas pelo próprio app, sem requisição a terceiros: o next/font
+// baixa as do Google no build e serve do nosso domínio.
 //
-// Anton é o título de cartaz e Instrument Serif é a legenda: as duas vieram no
-// redesign "mural da cidade", que troca o rótulo mono em caixa alta por uma
-// linha em serifa itálica. O corpo segue na pilha do sistema, de propósito:
-// uma terceira família baixada custaria mais do que entrega.
-//
-// A mono fica: ela é o número (relógio, contagem, GPS) e o rótulo das telas
-// internas. A Archivo saiu quando o --font-display passou a apontar para a
-// Anton: duas famílias de título seriam duas vozes.
-//
-// Só três arquivos, e um deles sem preload. A medição da LP mostrou 46 KB
-// descendo à toa em toda visita: a Instrument Serif reta nunca pintava (as
-// três classes de serifa são itálicas) e a mono descia inteira para servir
-// umas vinte figuras. A reta saiu do projeto; a mono perdeu o preload e a LP
-// deixou de usá-la, então ela só desce quando o app desenha um número.
-const cartaz = localFont({
-  src: "./fonts/anton-latin.woff2",
-  weight: "400",
-  variable: "--fonte-cartaz",
+// Redesign "Noite": Outfit no título (leve e larga, a voz da marca) e Manrope
+// no corpo e no cromo. A Anton e a Instrument Serif do mural saíram.
+// A mono fica para o número do app (relógio, contagem, GPS), sem preload.
+const titulo = Outfit({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--fonte-titulo",
   display: "swap",
 });
-const serifa = localFont({
-  // Só a itálica: toda legenda do projeto é itálica, e a reta descia sem
-  // nunca pintar. O `style` é obrigatório aqui, senão o navegador inclina
-  // de novo uma face que já vem inclinada.
-  src: [{ path: "./fonts/instrument-serif-italic-latin.woff2", weight: "400", style: "italic" }],
-  variable: "--fonte-serifa",
+const corpo = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--fonte-corpo",
   display: "swap",
 });
 const mono = localFont({
@@ -63,7 +52,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     // A classe do tema entra pelo script antes da hidratação
-    <html lang="pt-BR" className={`${cartaz.variable} ${serifa.variable} ${mono.variable} h-full`} suppressHydrationWarning>
+    <html lang="pt-BR" className={`${titulo.variable} ${corpo.variable} ${mono.variable} h-full`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>

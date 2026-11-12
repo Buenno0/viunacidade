@@ -17,7 +17,7 @@ export default function Termos() {
           <h1 className="font-display text-2xl font-bold">Termos de uso</h1>
         </div>
       </div>
-      <ul className="mt-6 space-y-3 rounded-none border border-line bg-surface p-5 text-sm leading-relaxed">
+      <ul className="mt-6 space-y-3 rounded-2xl border border-line bg-surface p-5 text-sm leading-relaxed">
         <li>Os posts aparecem no mapa sem o seu nome e saem do ar em até 12 horas depois de publicados.</li>
         <li>
           Se, ao publicar, você marcar &quot;Guardar no histórico&quot;, a foto fica visível para todos no histórico da cidade por

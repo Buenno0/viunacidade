@@ -3,9 +3,10 @@
 import { memo, useEffect, useRef, useState } from "react";
 import Medal from "@/components/Medal";
 import { DayBase, DayLayer, DayZzz, dayEvent, type DayEvent } from "./scenes";
-import { lpPaused, reducedMotion } from "./time";
+import { arc, fmt, lerpStops, lpPaused, put, putAll, reducedMotion, smooth, type Stop } from "./time";
 import { useNear } from "./useNear";
 import { useT } from "./lang";
+import { ceu } from "@/design/tokens.mjs";
 
 // "Um dia em Itapetininga": arraste o sol (ou deixe o dia passar sozinho) e
 // veja o que a cidade posta em cada hora.
@@ -39,36 +40,9 @@ const CROSSFADE_MS = 1100;
 const START = 6, END = 24;
 const HOURS_PER_SEC = 0.9; // o dia inteiro em ~20 s
 
-const fmt = (h: number) => `${String(Math.floor(h) % 24).padStart(2, "0")}:${String(Math.floor((h % 1) * 60)).padStart(2, "0")}`;
-
-// Interpolação por pontos (hora → valor)
-type Stop = [number, number[]];
-const lerpStops = (stops: Stop[], h: number) => {
-  if (h <= stops[0][0]) return stops[0][1];
-  for (let i = 1; i < stops.length; i++) {
-    const [h1, v1] = stops[i];
-    const [h0, v0] = stops[i - 1];
-    if (h <= h1) {
-      const t = (h - h0) / (h1 - h0);
-      return v0.map((v, k) => v + (v1[k] - v) * t);
-    }
-  }
-  return stops[stops.length - 1][1];
-};
-const SKY: Stop[] = [
-  [6, [58, 40, 58]],
-  [8, [42, 52, 74]],
-  [12, [34, 50, 76]],
-  [16, [40, 46, 70]],
-  [17.8, [86, 46, 50]],
-  [19.2, [26, 26, 52]],
-  [21, [11, 13, 24]],
-  [24, [8, 9, 18]],
-];
-const smooth = (a: number, b: number, h: number) => {
-  const t = Math.min(1, Math.max(0, (h - a) / (b - a)));
-  return t * t * (3 - 2 * t);
-};
+// o céu da cena é o mesmo da página (design/tokens.mjs, "ceu"): a faixa do
+// meio de cada hora, para a cidadezinha morar no mesmo dia da LP
+const SKY: Stop[] = (ceu as [number, string[]][]).map(([h, faixas]) => [h, [1, 3, 5].map((i) => parseInt(faixas[2].slice(i, i + 2), 16))]);
 
 // Os elementos que a hora mexe (achados uma vez, e de novo quando o SVG monta)
 type Targets = {
@@ -99,17 +73,6 @@ const findTargets = (sky: HTMLElement, range: HTMLInputElement | null): Targets 
   };
 };
 
-// Escreve só se mudou (o último valor fica guardado por elemento e propriedade)
-const written = new WeakMap<Element, Record<string, string>>();
-function put(el: (HTMLElement | SVGElement) | null, prop: string, value: string) {
-  if (!el) return;
-  let last = written.get(el);
-  if (!last) written.set(el, (last = {}));
-  if (last[prop] === value) return;
-  last[prop] = value;
-  el.style.setProperty(prop, value);
-}
-const putAll = (els: (HTMLElement | SVGElement)[], prop: string, value: string) => els.forEach((el) => put(el, prop, value));
 
 // Tudo que depende da hora e muda a cada quadro, sem React
 function paintHour(t: Targets, h: number) {
@@ -129,7 +92,6 @@ function paintHour(t: Targets, h: number) {
   put(t.range, "--l", Math.max(smooth(17.9, 18.9, h), 1 - smooth(6, 6.6, h)).toFixed(3));
   // sol de 6h a 18h30, lua depois; os dois num arco por cima da cidade.
   // Invisíveis, não se mexem (não há por que recalcular a posição)
-  const arc = (x: number) => [8 + x * 84, 30 - Math.sin(Math.PI * Math.min(1, Math.max(0, x))) * 22];
   const solO = 1 - smooth(17.8, 18.8, h);
   put(t.sol, "opacity", solO.toFixed(3));
   if (solO > 0) {
@@ -242,7 +204,7 @@ export default function DaySection() {
           sky.current = n;
           nearRef.current = n;
         }}
-        className="lp-dia min-w-0 flex-[1_1_480px] overflow-hidden rounded-none border border-line"
+        className="lp-dia min-w-0 flex-[1_1_480px] overflow-hidden rounded-[22px] border border-line"
         data-apagao={ev === "apagao" || undefined}
         style={{ aspectRatio: "11 / 9" }}
       >

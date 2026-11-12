@@ -60,9 +60,9 @@ export default function FadingPost() {
         )}
       </div>
 
-      <div ref={box} className="relative w-[280px]" style={{ height: 196 }}>
+      <div ref={box} className="light relative w-[280px]" style={{ height: 196 }}>
         {gone && (
-          <div className="lp-fantasma absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-none border border-dashed border-line text-center">
+          <div className="lp-fantasma absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-[22px] border border-dashed border-line text-center">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
               <circle cx="12" cy="12" r="9" strokeDasharray="3 3" />
               <path d="M12 7v5l3 2" />
@@ -72,7 +72,7 @@ export default function FadingPost() {
           </div>
         )}
       <article
-        className={`absolute inset-0 overflow-hidden rounded-none border ${gone ? "lp-desfaz border-line" : left <= URGENT ? "lp-urgente" : "lp-nasce border-line"}`}
+        className={`absolute inset-0 overflow-hidden rounded-[22px] border ${gone ? "lp-desfaz border-line" : left <= URGENT ? "lp-urgente" : "lp-nasce border-line"}`}
         style={{ background: "var(--surface)" }}
         aria-live="off"
       >

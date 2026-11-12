@@ -1,5 +1,52 @@
 # Design system — De Olho na Cidade
 
+> **Redesign "Noite" (11/11/2026).** A direção mudou. Onde este documento
+> ainda fala em papel de jornal, Anton, serifa itálica, canto vivo e "nenhuma
+> sombra", vale o que está abaixo. As referências e as três direções estudadas
+> estão no canvas https://claude.ai/artifact/4J38KCpicEG5Fb8aSvLG62 (a escolhida
+> é a B, com o DNA do Agentes.chat).
+>
+> - **A cidade vista de noite.** O escuro é o céu azul-marinho (`#0a1230`), o
+>   claro é o mesmo céu de dia (`#eef2fb`). Fonte única: `design/tokens.mjs`.
+> - **A marca é a janela acesa:** `--luz` (`#ffd27a`), para destaque, nível e
+>   pílula. O botão principal é branco sobre a noite e azul (`#2f56b8`) sobre
+>   o dia. O vermelho continua sendo só o agora.
+> - **Tipos:** Outfit no título (300 nos grandes, apertada) e Manrope no corpo,
+>   servidas pelo `next/font`. A mono fica para número do app. A Anton e a
+>   Instrument Serif saíram; `.legenda` virou rótulo em Manrope 600.
+> - **Forma:** botão com a ponta de balão (`14 14 14 4`, o mesmo canto do
+>   pedido "Alguém aí?"), cartões com raio 22 e sombra macia, sheet com raio
+>   26. O cabeçalho do app e o da LP são vidro escuro.
+> - **LP:** herói e fim são o céu de noite (`public/landing/noite.webp`) com as
+>   peças do app flutuando (`HeroNoite.tsx`); a seção do problema faz o
+>   amanhecer; o meio é o céu de dia com cartões brancos.
+> - **Marca: "Pino-olho"** (escolhida em 11/11/2026, canvas
+>   https://claude.ai/artifact/MbT8DmSM97xAjvxAtfnbow): o pin do mapa com um
+>   olho, e o anel do tempo em volta da pupila. Pin na luz (`--luz`), olho
+>   branco, pupila e anel na tinta da noite. Geometria única em
+>   `design/marca.mjs`, lida pelo `Mark`, pelas prévias de compartilhamento e
+>   por `npm run icones` (favicon, ícone do app, PNGs e ícone do iPhone). O
+>   contorno de Itapetininga deixou de ser a marca.
+> - **Olheiro: "Janela acesa"** (`components/landing/Olheiro.tsx`): cada
+>   Olheiro é um prédio, e os olhos são as janelas acesas. O nível é a
+>   construção: casinha, sobrado com antena, prédio com caixa d'água, torre do
+>   relógio, igreja com sino e, na Lenda, coroa de luzes com faixa de azulejo.
+>   SVG puro, sem ids, para rodar no servidor. No app, mora no botão da conta
+>   (com o anel de XP), no mapa vazio e nas confirmações do story.
+> - **Mapa:** o noturno foi puxado para o mesmo azul; o diurno ficou frio.
+> - **App: "Céu ao vivo"** (direção A, canvas
+>   https://claude.ai/artifact/8tLdovbzf46U822NgG5Hrm, pílula P2). Sem faixa no
+>   topo: uma pílula escura centralizada, com o contorno da luz (`--luz`) e um
+>   halo, flutuando sobre o mapa (`components/CeuDoApp.tsx`). Atrás dela, um véu
+>   escurece o alto do mapa (forte de noite, suave de dia), para a pílula nunca
+>   se misturar com as ruas. Na pílula: a marca, o relógio da cidade com "12 no
+>   ar" (ou o aviso do INMET, que abre no toque), o sino dos alertas e a conta
+>   (o seu Olheiro num círculo da luz, com o anel de XP). Os filtros ficam
+>   embaixo, no mesmo acabamento. As abas Mapa, Trends e Histórico ficam no
+>   cartão de baixo. O tema segue a hora (claro das 6h30 às 18h, `lib/ceu.ts`)
+>   até a pessoa fixar outro em "Céu do mapa". O pin é o pino-olho, com a foto
+>   no olho. `/mapa?ceu=6.5` força a hora para conferir o céu.
+
 Herdeiro direto do design system do NAS Ozymandias (`~/nas/DESIGN.md`). Mesma
 paleta, mesma régua de contraste, mesmas regras de forma; o que muda é o
 assunto. Este documento descreve **o que existe no código**. Os números de
@@ -307,6 +354,39 @@ ninguém confundir com o agora. No visualizador, "registrado em 28/09 às
 ---
 
 ## 6. Movimento
+
+### 6.1 LP (redesign "Noite", pt2)
+
+Referência: agentes.chat. Tudo respeita `prefers-reduced-motion` e o botão
+"Pausar animações"; o que está fora da tela fica pausado (`.lp-fora`).
+
+| o quê | como | arquivo |
+|---|---|---|
+| **Céu do dia** | camada fixa que passa por um dia inteiro conforme a rolagem: herói 21h, problema 5h30 (amanhecer), meio do dia, comércios 17h45, outras cidades 18h15 (pôr do sol), fim 21h. A hora sai das âncoras `data-hora` (meio de cada seção), não da porcentagem da página. Um rAF por rolagem, variáveis só na camada do céu, no cabeçalho e nas janelas | `CeuDoDia.tsx`, paleta `ceu` em `design/tokens.mjs` |
+| estrelas, nuvens, sol, lua, janelas | estrelas em dois ladrilhos que piscam (3,6 s); nuvens só de dia, derivando (180 s); sol e lua num arco achatado no alto da tela; janelas do horizonte acendem à noite | `scripts/gerar-ceu.mjs` (`npm run ceu`) |
+| **Relógio do céu** | a hora da página no cabeçalho, com sol ou lua | `Cabecalho.tsx` |
+| cabeçalho | transparente no topo, vidro tingido pelo céu depois do herói; some descendo, volta subindo; linha de leitura pontilhada | `Cabecalho.tsx` |
+| entrada | opacidade + `blur(6px)` + subida de 18 px, 0,9 s; filhos em sequência de 80 ms (`--rv-d`). É animação só de entrada (`backwards`), para o hover e a inclinação continuarem valendo | `Reveal.tsx` |
+| inclinação e luz | cartões `.lp-tilt` inclinam até 3°/4° e uma luz segue o mouse; só com mouse | `Reveal.tsx` |
+| herói | o aviso cai do alto e troca a cada 9 s; o post aparece depois de "alguém está postando"; o "Agora" ecoa; os cartões flutuam (7 s) | `HeroNoite.tsx` |
+| **Olheiros** | piscam, olham em volta e respiram; pulam esticando e encolhendo ao toque (0,62 s) e falam num balão `13 13 13 4`; ficam empoleirados nos cartões | `Olheiro.tsx`, `OlheiroVivo.tsx` |
+| o voo | o Olheiro roxo sai do trio do herói quando o problema passa de 60% da tela e pousa no primeiro cartão (0,95 s, em arco, esticando no pouso); na volta faz o caminho inverso | `VooOlheiro` em `OlheiroVivo.tsx` |
+
+Curvas: `--out` (`0.2, 0.8, 0.2, 1`) para entradas e `--spring`
+(`0.34, 1.56, 0.64, 1`) para pulos e balões. A entrada e o hover usam
+`translate`, e o `transform` fica livre para a inclinação.
+
+Todo pulo, pouso e entrada da LP usa uma dessas duas curvas; as poucas que
+sobram são de propósito (a saída acelerada do post que some, o voo). As cenas
+e demos seguem a Noite: a "Um dia em Itapetininga" pinta o céu com a mesma
+paleta `ceu` da página, o celular do alerta tem a cidade à noite na tela de
+bloqueio, pins e detecção de rosto e placa usam a luz (`#ffd27a`), e as
+nuvens ficam translúcidas (38%) porque passam atrás de títulos brancos.
+
+Com movimento reduzido o céu continua seguindo a rolagem (é cor, não
+movimento); voo, pulos, inclinação, desfoque e o piscar das estrelas param.
+
+### 6.2 App
 
 | duração | uso |
 |---|---|

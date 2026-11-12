@@ -10,14 +10,19 @@ function rng(seed: number) {
 // As "fotos" da LP: cenas isométricas da cidade, uma por categoria.
 // Animação só por classe CSS (app/landing.css), sem JS.
 
+// Carros e roupas na família de cores da Noite (os Olheiros e a luz)
 const CAR = {
-  azul: ["#5a7db3", "#3f5f92", "#2f4a74"],
-  bege: ["#e3d6bd", "#cbbd9f", "#a99b7e"],
-  verde: ["#94c4ad", "#6e9f89", "#557f6c"],
-  branco: ["#f0ece4", "#d4cfc4", "#b0aa9d"],
-  vermelho: ["#d0604f", "#a8463a", "#86362c"],
+  azul: ["#8cc6ff", "#4b8fd8", "#2f6fbd"],
+  bege: ["#d9d0ff", "#a597ff", "#7d6fe0"],
+  verde: ["#8fe3cf", "#4fbfa4", "#3a9c86"],
+  branco: ["#f3f5ff", "#cfd6ea", "#aab5d4"],
+  vermelho: ["#ff9a9a", "#e35b5b", "#b84444"],
 };
-const SHIRTS = ["#d29a44", "#7fb79a", "#e08163", "#8fb0f5", "#f4efe4", "#b98bd6", "#e9c98f"];
+const SHIRTS = ["#ffd27a", "#5fd3b8", "#f08f6f", "#79bcff", "#f3f5ff", "#a597ff", "#ff7cb8"];
+// madeira do palco e das barracas, puxada para o roxo da noite
+const MADEIRA = ["#5b4f9e", "#463c84", "#362e6b"];
+// estrelas do fundo das cenas (posição fixa: a cena sai igual no servidor)
+const ESTRELAS = [[30, 22], [72, 58], [118, 18], [164, 44], [212, 12], [256, 36], [300, 20], [344, 52], [392, 26], [420, 64], [48, 92], [380, 96], [236, 70], [140, 80]];
 
 type Item = { k: number; el: ReactNode };
 // Pintor: de trás (x + y menor) para a frente
@@ -27,9 +32,22 @@ const paint = (items: Item[]) => [...items].sort((a, b) => a.k - b.k).map((i) =>
 type SceneProps = { className?: string; title?: string; vb?: string };
 
 function Frame({ children, className, title, vb = "0 0 440 360" }: SceneProps & { children: ReactNode; vb?: string }) {
+  // o céu cobre o viewBox inteiro, mesmo quando ele não começa em 0 0 (a loja)
+  const [vx, vy, vw, vh] = vb.split(/[\s,]+/).map(Number);
   return (
     <svg viewBox={vb} preserveAspectRatio="xMidYMid slice" className={className} role={title ? "img" : undefined} aria-label={title} aria-hidden={title ? undefined : true}>
-      <rect width="100%" height="100%" fill="#0f0e0c" />
+      <defs>
+        <linearGradient id="lp-iso-ceu" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#081030" />
+          <stop offset="1" stopColor="#1a3274" />
+        </linearGradient>
+      </defs>
+      <rect x={vx} y={vy} width={vw} height={vh} fill="url(#lp-iso-ceu)" />
+      <g fill="#fff">
+        {ESTRELAS.map(([x, y], i) => (
+          <circle key={i} cx={x} cy={y} r={i % 3 ? 0.9 : 1.4} opacity={i % 2 ? 0.45 : 0.75} />
+        ))}
+      </g>
       {children}
     </svg>
   );
@@ -41,7 +59,7 @@ function Pin({ x, y, color, children }: { x: number; y: number; color: string; c
     <g>
       <line x1={x} y1={y + 16} x2={x} y2={y + 40} stroke={color} strokeWidth="1.5" strokeDasharray="3 3" opacity=".7" />
       <circle cx={x} cy={y} r="22" fill="none" stroke={color} strokeWidth="2" className="lp-svg-ping" />
-      <circle cx={x} cy={y} r="16" fill="#211c15" stroke={color} strokeWidth="3" />
+      <circle cx={x} cy={y} r="16" fill="#0a1230" stroke={color} strokeWidth="3" />
       <g transform={`translate(${x - 8} ${y - 8})`} stroke={color} fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         {children}
       </g>
@@ -83,7 +101,7 @@ export function AccidentScene(p: SceneProps) {
       {paint(items)}
       <circle cx={lx} cy={ly} r="3" fill="#ffb347" className="lp-blink" />
       <circle cx={rx} cy={ry} r="3" fill="#ffb347" className="lp-blink" />
-      <Pin x={bx} y={by - 44} color="#e08163">
+      <Pin x={bx} y={by - 44} color="#ff6b6b">
         <path d="M8 1.5 0.8 14h14.4Z" />
         <path d="M8 6v3.5M8 11.6h.01" />
       </Pin>
@@ -104,21 +122,21 @@ export function EventScene(p: SceneProps) {
     }
   const stage = (
     <g key="st">
-      {g.box(3.6, 3.2, 0, 2.8, 1.6, 0.4, ["#5a4630", "#46372a", "#3a2d22"])}
-      {g.person(4.3, 3.7, "#f4efe4", "#c98f62", "m1")}
-      {g.person(5.2, 3.6, "#d29a44", "#8d5b3c", "m2")}
+      {g.box(3.6, 3.2, 0, 2.8, 1.6, 0.4, MADEIRA)}
+      {g.person(4.3, 3.7, "#f3f5ff", "#c98f62", "m1")}
+      {g.person(5.2, 3.6, "#ffd27a", "#8d5b3c", "m2")}
       {/* tenda */}
       {(() => {
         const top = g.P(5, 4, 2.2);
         const a = g.P(3.5, 3.1, 1.4), b = g.P(6.5, 3.1, 1.4), c = g.P(6.5, 4.9, 1.4), d = g.P(3.5, 4.9, 1.4);
         return (
           <>
-            <polygon points={g.pts(a, b, top)} fill="#9c3f1d" />
-            <polygon points={g.pts(b, c, top)} fill="#c2552c" />
-            <polygon points={g.pts(d, c, top)} fill="#f4efe4" />
-            <polygon points={g.pts(a, d, top)} fill="#e7ddc7" />
+            <polygon points={g.pts(a, b, top)} fill="#c96f53" />
+            <polygon points={g.pts(b, c, top)} fill="#f08f6f" />
+            <polygon points={g.pts(d, c, top)} fill="#f3f5ff" />
+            <polygon points={g.pts(a, d, top)} fill="#cfd6ea" />
             {[a, b, c, d].map((q, i) => (
-              <line key={i} x1={q[0]} y1={q[1]} x2={q[0]} y2={q[1] + 1.4 * 22 - (i === 1 ? 0 : 0)} stroke="#55534d" strokeWidth="1.5" />
+              <line key={i} x1={q[0]} y1={q[1]} x2={q[0]} y2={q[1] + 1.4 * 22 - (i === 1 ? 0 : 0)} stroke="#3a55a8" strokeWidth="1.5" />
             ))}
           </>
         );
@@ -132,7 +150,7 @@ export function EventScene(p: SceneProps) {
     const b = corners[(i + 1) % 4];
     for (let t = 0.06; t < 1; t += 0.11) {
       const sag = Math.sin(Math.PI * t) * 10;
-      bulbs.push(<circle key={`${i}${t}`} cx={a[0] + (b[0] - a[0]) * t} cy={a[1] + (b[1] - a[1]) * t + sag} r="2.3" fill="#f6d58c" className="lp-twinkle" style={{ animationDelay: `${(t * 7 + i) % 2}s` }} />);
+      bulbs.push(<circle key={`${i}${t}`} cx={a[0] + (b[0] - a[0]) * t} cy={a[1] + (b[1] - a[1]) * t + sag} r="2.3" fill="#ffd27a" className="lp-twinkle" style={{ animationDelay: `${(t * 7 + i) % 2}s` }} />);
     }
   });
   const back = bulbs.slice(0, 9);
@@ -142,8 +160,8 @@ export function EventScene(p: SceneProps) {
     <Frame {...p}>
       <Ground g={g} />
       <Road g={g} x={0} y={0.2} w={10} d={1.6} />
-      {g.tile(2.2, 2.2, 5.6, 6.2, "#20291f")}
-      {g.tile(2.6, 5.2, 4.8, 2.8, "#2b3328")}
+      {g.tile(2.2, 2.2, 5.6, 6.2, "#1d3a6e")}
+      {g.tile(2.6, 5.2, 4.8, 2.8, "#24477f")}
       {g.box(0.4, 8.6, 0, 1.4, 1.2, 0.01, C.escuro)}
       {back}
       {paint([
@@ -157,7 +175,7 @@ export function EventScene(p: SceneProps) {
         { k: 10, el: g.house(0.4, 4.6, 1.4, 1.7, 0.85, C.verde, "h2") },
       ])}
       {front}
-      <Pin x={px} y={py - 40} color="#d29a44">
+      <Pin x={px} y={py - 40} color="#ffd27a">
         <path d="M5.5 12V3l9-1.5v9" />
         <circle cx="3.5" cy="12" r="2" />
         <circle cx="12.5" cy="10.5" r="2" />
@@ -173,7 +191,7 @@ export function FloodScene(p: SceneProps) {
   const rnd = rng(3);
   for (let i = 0; i < 70; i++) {
     const x = rnd() * 460 - 10, y = rnd() * 380 - 20;
-    rain.push(<line key={i} x1={x} y1={y} x2={x - 4} y2={y + 12} stroke="#a8c6dd" strokeWidth="1" opacity=".35" />);
+    rain.push(<line key={i} x1={x} y1={y} x2={x - 4} y2={y + 12} stroke="#cfe2ff" strokeWidth="1" opacity=".35" />);
   }
   const [cx, cy] = g.P(carX + 0.75, carY + 0.37, 0.25);
   const [px, py] = g.P(carX + 0.7, carY + 0.4, 1.4);
@@ -192,14 +210,14 @@ export function FloodScene(p: SceneProps) {
       {g.car(6.6, 5.2, CAR.branco, "x", "c2")}
       {/* a água sobe sobre a rua e a calçada; o carro afunda até a porta */}
       <g className="lp-agua-sobe">
-        {g.tile(0, 3.0, 10, 4.0, "#2b5f86", 0.26, { opacity: 0.82 })}
+        {g.tile(0, 3.0, 10, 4.0, "#3d7fd8", 0.26, { opacity: 0.82 })}
       </g>
       {g.box(carX, carY, 0.27, 1.5, 0.75, 0.21, CAR.vermelho)}
-      {g.box(carX + 0.3, carY + 0.045, 0.48, 0.75, 0.66, 0.3, ["#3b4652", "#7d93a6", "#5e7488"])}
+      {g.box(carX + 0.3, carY + 0.045, 0.48, 0.75, 0.66, 0.3, ["#1a2a66", "#7f9be6", "#5674c8"])}
       {g.box(6.6, 5.2, 0.27, 1.5, 0.75, 0.21, CAR.branco)}
-      {g.box(6.9, 5.245, 0.48, 0.75, 0.66, 0.3, ["#3b4652", "#7d93a6", "#5e7488"])}
+      {g.box(6.9, 5.245, 0.48, 0.75, 0.66, 0.3, ["#1a2a66", "#7f9be6", "#5674c8"])}
       {[0, 1.2, 2.4].map((d) => (
-        <ellipse key={d} cx={cx} cy={cy + 6} rx="40" ry="18" fill="none" stroke="#a8d2e6" strokeWidth="1.2" className="lp-onda" style={{ animationDelay: `${d}s` }} />
+        <ellipse key={d} cx={cx} cy={cy + 6} rx="40" ry="18" fill="none" stroke="#bfe0ff" strokeWidth="1.2" className="lp-onda" style={{ animationDelay: `${d}s` }} />
       ))}
       {paint([
         { k: 8.4, el: g.house(0.6, 7.4, 2.4, 2, 0.9, C.areia, "h3") },
@@ -209,7 +227,7 @@ export function FloodScene(p: SceneProps) {
         { k: 16, el: g.tree(8.6, 7.8, 0.9, "a2") },
       ])}
       <g className="lp-chuva">{rain}</g>
-      <Pin x={px} y={py - 40} color="#dca84a">
+      <Pin x={px} y={py - 40} color="#ffc35c">
         <path d="M8 1s5 5.5 5 9.5a5 5 0 0 1-10 0C3 6.5 8 1 8 1Z" />
       </Pin>
     </Frame>
@@ -220,8 +238,8 @@ export function FloodScene(p: SceneProps) {
 export function BlurScene(p: SceneProps) {
   const g = iso(46, 205, 104);
   const people = [
-    { x: 1.1, y: 1.0, shirt: "#7fb79a", skin: "#d8a57a" },
-    { x: 2.3, y: 1.35, shirt: "#e08163", skin: "#8d5b3c" },
+    { x: 1.1, y: 1.0, shirt: "#5fd3b8", skin: "#d8a57a" },
+    { x: 2.3, y: 1.35, shirt: "#f08f6f", skin: "#8d5b3c" },
   ];
   const k = 1.5;
   const heads = people.map((q) => g.head(q.x, q.y, k));
@@ -248,16 +266,16 @@ export function BlurScene(p: SceneProps) {
       {g.tile(0, 0, 6.5, 2.4, C.calcada)}
       {g.tile(0, 2.4, 6.5, 3, C.rua)}
       {g.box(0.2, 0.05, 0, 6, 0.55, 2.6, C.bege)}
-      {g.quad("L", 0.2, 0.6, 0.4, 1.6, 0.25, 1.4, "#3b4652")}
-      {g.quad("L", 0.2, 0.6, 2.1, 2.8, 0, 1.4, "#5a3d27")}
-      {g.quad("L", 0.2, 0.6, 3.2, 5.6, 0.25, 1.4, "#3b4652")}
+      {g.quad("L", 0.2, 0.6, 0.4, 1.6, 0.25, 1.4, "#1a2a66")}
+      {g.quad("L", 0.2, 0.6, 2.1, 2.8, 0, 1.4, C.porta)}
+      {g.quad("L", 0.2, 0.6, 3.2, 5.6, 0.25, 1.4, "#1a2a66")}
       {g.quad("L", 0.2, 0.6, 3.25, 5.55, 0.3, 1.35, C.janela, { opacity: 0.35 })}
-      <text transform={`matrix(0.866 0.5 0 1 ${sign[0]} ${sign[1]})`} fontFamily="var(--font-display)" fontWeight="700" fontSize="15" fill="#8e4a1f">PADARIA</text>
+      <text transform={`matrix(0.866 0.5 0 1 ${sign[0]} ${sign[1]})`} fontFamily="var(--font-display)" fontWeight="700" fontSize="15" fill="#7465d6">PADARIA</text>
       {g.lamp(5.6, 1.9)}
       {people.map((q, i) => g.person(q.x, q.y, q.shirt, q.skin, `p${i}`, true, k))}
       {g.car(carX, carY, CAR.azul, "x", "c", ck)}
       <g transform={`matrix(0.866 -0.5 0 1 ${plO[0]} ${plO[1]})`}>
-        <rect width={PW} height={PH} rx="1.6" fill="#f7f5ef" stroke="#1a1815" strokeWidth=".7" />
+        <rect width={PW} height={PH} rx="1.6" fill="#f7f5ef" stroke="#0a1230" strokeWidth=".7" />
         <path d={`M0 1.6a1.6 1.6 0 0 1 1.6-1.6H${PW - 1.6}a1.6 1.6 0 0 1 1.6 1.6V${PH * 0.27}H0Z`} fill="#1f4fa8" />
         <text x={PW / 2} y={PH * 0.22} textAnchor="middle" fontFamily="var(--font-sans)" fontWeight="700" fontSize={PH * 0.17} fill="#fff" letterSpacing=".6">BRASIL</text>
         <rect x={PW - 5} y={PH * 0.06} width="3.6" height={PH * 0.15} fill="#2f9a4f" />
@@ -272,21 +290,21 @@ export function BlurScene(p: SceneProps) {
         <polygon points={g.pts(...pl)} fill="#d9d4c8" filter="url(#lp-borrar)" />
         <rect x={plBox.x} y={plBox.y} width={plBox.w} height={plBox.h} fill="#cfcabd" filter="url(#lp-borrar)" opacity=".85" />
       </g>
-      <g className="lp-det" fill="none" stroke="#d29a44" strokeWidth="1.6" strokeDasharray="4 3">
+      <g className="lp-det" fill="none" stroke="#ffd27a" strokeWidth="1.6" strokeDasharray="4 3">
         {heads.map((h, i) => (
           <g key={i}>
             <rect x={h.hx - h.hr * 1.5} y={h.hy - h.hr * 1.5} width={h.hr * 3} height={h.hr * 3} rx="4" />
-            <rect x={h.hx - h.hr * 1.5} y={h.hy - h.hr * 1.5 - 15} width="36" height="12" rx="6" fill="#d29a44" stroke="none" />
-            <text x={h.hx - h.hr * 1.5 + 18} y={h.hy - h.hr * 1.5 - 6} textAnchor="middle" fontFamily="var(--font-sans)" fontSize="8" fill="#1a1206" stroke="none">rosto</text>
+            <rect x={h.hx - h.hr * 1.5} y={h.hy - h.hr * 1.5 - 15} width="36" height="12" rx="6" fill="#ffd27a" stroke="none" />
+            <text x={h.hx - h.hr * 1.5 + 18} y={h.hy - h.hr * 1.5 - 6} textAnchor="middle" fontFamily="var(--font-sans)" fontSize="8" fill="#0a1230" stroke="none">rosto</text>
           </g>
         ))}
         <rect x={plBox.x} y={plBox.y} width={plBox.w} height={plBox.h} rx="3" />
-        <rect x={plBox.x} y={plBox.y + plBox.h + 3} width="36" height="12" rx="6" fill="#d29a44" stroke="none" />
-        <text x={plBox.x + 18} y={plBox.y + plBox.h + 12} textAnchor="middle" fontFamily="var(--font-sans)" fontSize="8" fill="#1a1206" stroke="none">placa</text>
+        <rect x={plBox.x} y={plBox.y + plBox.h + 3} width="36" height="12" rx="6" fill="#ffd27a" stroke="none" />
+        <text x={plBox.x + 18} y={plBox.y + plBox.h + 12} textAnchor="middle" fontFamily="var(--font-sans)" fontSize="8" fill="#0a1230" stroke="none">placa</text>
       </g>
       <g className="lp-scan">
-        <rect x="0" y="0" width="440" height="2" fill="#d29a44" />
-        <rect x="0" y="-26" width="440" height="26" fill="#d29a44" opacity=".12" />
+        <rect x="0" y="0" width="440" height="2" fill="#ffd27a" />
+        <rect x="0" y="-26" width="440" height="26" fill="#ffd27a" opacity=".12" />
       </g>
     </Frame>
   );
@@ -345,8 +363,8 @@ export function CityScene({ className, title }: SceneProps) {
             {g.box(x, 0.9, 0, 0.7, 0.7, 2.4, C.bege)}
             <polygon points={g.pts(g.P(x, 0.9, 2.4), g.P(x + 0.7, 0.9, 2.4), g.P(x + 0.35, 1.25, 2.9))} fill={C.telhado[1]} />
             <polygon points={g.pts(g.P(x + 0.7, 0.9, 2.4), g.P(x + 0.7, 1.6, 2.4), g.P(x + 0.35, 1.25, 2.9))} fill={C.telhado[0]} />
-            <polygon points={g.pts(g.P(x, 1.6, 2.4), g.P(x + 0.7, 1.6, 2.4), g.P(x + 0.35, 1.25, 2.9))} fill="#a85a26" />
-            <path d={`M${tx} ${ty} v-9 M${tx - 3} ${ty - 6} h6`} stroke="#d29a44" strokeWidth="1.4" />
+            <polygon points={g.pts(g.P(x, 1.6, 2.4), g.P(x + 0.7, 1.6, 2.4), g.P(x + 0.35, 1.25, 2.9))} fill="#5b4fc0" />
+            <path d={`M${tx} ${ty} v-9 M${tx - 3} ${ty - 6} h6`} stroke="#ffd27a" strokeWidth="1.4" />
           </g>
         );
       })}
@@ -357,21 +375,21 @@ export function CityScene({ className, title }: SceneProps) {
   const [c1x, c1y] = g.P(12.8, 12.8, 5.2);
   const crane = (
     <g>
-      {g.box(11.6, 11.9, 0, 1.6, 1.6, 1.4, ["#4a4a52", "#3a3a42", "#2e2e35"])}
-      <polygon points={g.pts(g.P(11.6, 11.9, 1.4), g.P(13.2, 11.9, 1.4), g.P(13.2, 13.5, 1.4), g.P(11.6, 13.5, 1.4))} fill="none" stroke="#8a8f99" strokeWidth=".8" />
-      <line x1={c0x} y1={c0y} x2={c1x} y2={c1y} stroke="#d29a44" strokeWidth="3" />
+      {g.box(11.6, 11.9, 0, 1.6, 1.6, 1.4, ["#4a68c4", "#2f4a9e", "#22397f"])}
+      <polygon points={g.pts(g.P(11.6, 11.9, 1.4), g.P(13.2, 11.9, 1.4), g.P(13.2, 13.5, 1.4), g.P(11.6, 13.5, 1.4))} fill="none" stroke="#9fadd8" strokeWidth=".8" />
+      <line x1={c0x} y1={c0y} x2={c1x} y2={c1y} stroke="#ffd27a" strokeWidth="3" />
       <g className="lp-guindaste" style={{ transformOrigin: `${c1x}px ${c1y}px` }}>
-        <line x1={c1x - 70} y1={c1y + 10} x2={c1x + 40} y2={c1y - 8} stroke="#d29a44" strokeWidth="2.4" />
-        <line x1={c1x - 58} y1={c1y + 8} x2={c1x - 58} y2={c1y + 44} stroke="#8a8f99" strokeWidth=".8" />
-        <rect x={c1x - 62} y={c1y + 44} width="8" height="6" fill="#b4a78b" />
+        <line x1={c1x - 70} y1={c1y + 10} x2={c1x + 40} y2={c1y - 8} stroke="#ffd27a" strokeWidth="2.4" />
+        <line x1={c1x - 58} y1={c1y + 8} x2={c1x - 58} y2={c1y + 44} stroke="#9fadd8" strokeWidth=".8" />
+        <rect x={c1x - 62} y={c1y + 44} width="8" height="6" fill="#9fadd8" />
       </g>
     </g>
   );
   // Barracas da feira na praça
   const stalls = [0, 1, 2].map((i) => (
     <g key={i}>
-      {g.box(8.3 + i * 1.1, 10.1, 0, 0.8, 0.6, 0.45, ["#5a4630", "#46372a", "#3a2d22"])}
-      {g.box(8.25 + i * 1.1, 10.05, 0.55, 0.9, 0.7, 0.08, i % 2 ? ["#f4efe4", "#e7ddc7", "#cfc3a8"] : ["#e08163", "#c2552c", "#9c3f1d"])}
+      {g.box(8.3 + i * 1.1, 10.1, 0, 0.8, 0.6, 0.45, MADEIRA)}
+      {g.box(8.25 + i * 1.1, 10.05, 0.55, 0.9, 0.7, 0.08, i % 2 ? ["#f3f5ff", "#cfd6ea", "#aab5d4"] : ["#ffb9a1", "#f08f6f", "#c96f53"])}
     </g>
   ));
 
@@ -408,8 +426,8 @@ export function CityScene({ className, title }: SceneProps) {
     <svg viewBox={`0 0 ${CITY_VB.w} ${CITY_VB.h}`} className={className} role={title ? "img" : undefined} aria-label={title} aria-hidden={title ? undefined : true}>
       <g className="lp-chao">
         <Ground g={g} n={14} />
-        {g.tile(7.9, 7.9, 5.4, 3.0, "#20291f")}
-        {g.tile(8.1, 8.1, 5.0, 2.6, "#2b3328")}
+        {g.tile(7.9, 7.9, 5.4, 3.0, "#1d3a6e")}
+        {g.tile(8.1, 8.1, 5.0, 2.6, "#24477f")}
         <Road g={g} x={0} y={6} w={14} d={1.6} />
         <Road g={g} x={6} y={0} w={1.6} d={14} />
         <Road g={g} x={0} y={11.2} w={6} d={1.0} />
@@ -417,10 +435,10 @@ export function CityScene({ className, title }: SceneProps) {
       </g>
       {paint(back)}
       {/* carros andando na avenida: depois do que fica atrás, antes do que fica na frente */}
-      <g className="lp-anda" style={{ animationDelay: "0s" }}>{g.car(-1.6, 6.15, ["#5a7db3", "#3f5f92", "#2f4a74"], "x")}</g>
-      <g className="lp-anda" style={{ animationDelay: "-4.5s" }}>{g.car(-1.6, 6.75, ["#f0ece4", "#d4cfc4", "#b0aa9d"], "x")}</g>
-      <g className="lp-anda lp-anda-lenta" style={{ animationDelay: "-2s" }}>{g.car(-1.6, 6.15, ["#94c4ad", "#6e9f89", "#557f6c"], "x")}</g>
-      {g.car(6.2, 9.0, ["#e3d6bd", "#cbbd9f", "#a99b7e"], "y")}
+      <g className="lp-anda" style={{ animationDelay: "0s" }}>{g.car(-1.6, 6.15, CAR.azul, "x")}</g>
+      <g className="lp-anda" style={{ animationDelay: "-4.5s" }}>{g.car(-1.6, 6.75, CAR.branco, "x")}</g>
+      <g className="lp-anda lp-anda-lenta" style={{ animationDelay: "-2s" }}>{g.car(-1.6, 6.15, CAR.verde, "x")}</g>
+      {g.car(6.2, 9.0, CAR.bege, "y")}
       {paint(front)}
     </svg>
   );
@@ -459,12 +477,12 @@ export function DayBase({ part }: { part: "fundo" | "frente" }) {
     <>
       <g className="lp-estrelas">
         {[40, 90, 150, 260, 320, 390, 70, 360, 200, 120].map((x, i) => (
-          <circle key={i} cx={x} cy={18 + ((i * 37) % 70)} r="1.2" fill="#f4efe4" className="lp-twinkle" style={{ animationDelay: `${i * 0.3}s` }} />
+          <circle key={i} cx={x} cy={18 + ((i * 37) % 70)} r="1.2" fill="#f3f5ff" className="lp-twinkle" style={{ animationDelay: `${i * 0.3}s` }} />
         ))}
       </g>
       <Ground g={g} />
       <Road g={g} x={0} y={4} w={10} d={1.8} />
-      {g.tile(5.8, 5.8, 3.8, 3.4, "#20291f")}
+      {g.tile(5.8, 5.8, 3.8, 3.4, "#1d3a6e")}
       {paint([
         { k: 1, el: <g key="p1">{g.box(0.5, 0.5, 0, 2.2, 2.4, 3.6, C.escuro)}<g className="lp-luzes">{g.windows(0.5, 0.5, 0, 2.2, 2.4, 3.6, 0.75, 3, "lp-janela")}</g></g> },
         { k: 4.4, el: g.house(...DAY_HOUSES.h1, C.bege, "h1") },
@@ -482,14 +500,14 @@ export function DayLayer({ ev, over }: { ev: DayEvent; over?: boolean }) {
   const g = dayIso();
   if (over) {
     const [pinX, pinY] = ev === "transito" ? g.P(4.5, 4.6, 1.6) : ev === "chuva" ? g.P(3, 5, 1.4) : ev === "apagao" ? g.P(1.6, 1.6, 4.4) : g.P(7.6, 7.2, 1.8);
-    const pinColor = ev === "feira" || ev === "show" ? "#d29a44" : "#dca84a";
+    const pinColor = "#ffd27a"; // a luz da marca (antes, o dourado do visual antigo)
     return (
       <>
         {ev === "chuva" && (
           <g className="lp-chuva">
             {Array.from({ length: 60 }, (_, i) => {
               const x = (i * 53) % 460, y = (i * 97) % 380;
-              return <line key={i} x1={x} y1={y} x2={x - 4} y2={y + 12} stroke="#a8c6dd" strokeWidth="1" opacity=".35" />;
+              return <line key={i} x1={x} y1={y} x2={x - 4} y2={y + 12} stroke="#cfe2ff" strokeWidth="1" opacity=".35" />;
             })}
           </g>
         )}
@@ -497,7 +515,7 @@ export function DayLayer({ ev, over }: { ev: DayEvent; over?: boolean }) {
           Array.from({ length: 12 }, (_, i) => {
             const [x1, y1] = g.P(5.9, 5.9, 1.5), [x2, y2] = g.P(9.5, 5.9, 1.5);
             const t = (i + 0.5) / 12;
-            return <circle key={i} cx={x1 + (x2 - x1) * t} cy={y1 + (y2 - y1) * t + Math.sin(Math.PI * t) * 8} r="2.2" fill="#f6d58c" className="lp-twinkle" style={{ animationDelay: `${(i % 4) * 0.4}s` }} />;
+            return <circle key={i} cx={x1 + (x2 - x1) * t} cy={y1 + (y2 - y1) * t + Math.sin(Math.PI * t) * 8} r="2.2" fill="#ffd27a" className="lp-twinkle" style={{ animationDelay: `${(i % 4) * 0.4}s` }} />;
           })}
         <Pin x={pinX} y={pinY - 30} color={pinColor}>
           {ev === "transito" && <path d="M1 8h14v5H1Z M2.5 8l1.5-4h8l1.5 4" />}
@@ -520,21 +538,21 @@ export function DayLayer({ ev, over }: { ev: DayEvent; over?: boolean }) {
   if (ev === "transito")
     [0, 1, 2, 3, 4].forEach((i) => items.push({ k: 4 + i * 1.6, el: g.car(0.2 + i * 1.75, 4.3, i % 2 ? CAR.branco : i % 3 ? CAR.azul : CAR.vermelho, "x", `carro${i}`) }));
   else items.push({ k: 9, el: g.car(4.5, 4.3, CAR.azul, "x", "c1") });
-  if (ev === "chuva") items.push({ k: 0, el: <g key="agua" className="lp-agua-sobe">{g.tile(0, 3.7, 10, 2.4, "#2b5f86", 0.12, { opacity: 0.75 })}</g> });
+  if (ev === "chuva") items.push({ k: 0, el: <g key="agua" className="lp-agua-sobe">{g.tile(0, 3.7, 10, 2.4, "#3d7fd8", 0.12, { opacity: 0.75 })}</g> });
   if (ev === "feira")
     [0, 1, 2].forEach((i) =>
       items.push({
         k: 6.4 + i,
         el: (
           <g key={`b${i}`}>
-            {g.box(6.3 + i * 1.05, 6.0, 0, 0.8, 0.6, 0.45, ["#5a4630", "#46372a", "#3a2d22"])}
-            {g.box(6.25 + i * 1.05, 5.95, 0.55, 0.9, 0.7, 0.08, i % 2 ? ["#f4efe4", "#e7ddc7", "#cfc3a8"] : ["#7fb79a", "#5f8778", "#4a6b5e"])}
+            {g.box(6.3 + i * 1.05, 6.0, 0, 0.8, 0.6, 0.45, MADEIRA)}
+            {g.box(6.25 + i * 1.05, 5.95, 0.55, 0.9, 0.7, 0.08, i % 2 ? ["#f3f5ff", "#cfd6ea", "#aab5d4"] : ["#8fe3cf", "#5fd3b8", "#3fa58e"])}
           </g>
         ),
       }),
     );
   if (ev === "show")
-    items.push({ k: 7.2, el: <g key="palco">{g.box(6.4, 6.0, 0, 2.4, 0.8, 0.35, ["#5a4630", "#46372a", "#3a2d22"])}{g.person(7.2, 6.2, "#f4efe4", "#c98f62")}{g.person(7.9, 6.2, "#d29a44", "#8d5b3c")}</g> });
+    items.push({ k: 7.2, el: <g key="palco">{g.box(6.4, 6.0, 0, 2.4, 0.8, 0.35, MADEIRA)}{g.person(7.2, 6.2, "#f3f5ff", "#c98f62")}{g.person(7.9, 6.2, "#ffd27a", "#8d5b3c")}</g> });
   if (ev === "feira" || ev === "show")
     for (let yy = 6.9; yy < 8.9; yy += 0.55)
       for (let xx = ev === "show" ? 6.2 : 6.4; xx < 9.4; xx += 0.6) {
@@ -555,7 +573,7 @@ export function DayZzz() {
         return (
           <g key={n} transform={`translate(${hx.toFixed(1)} ${hy.toFixed(1)})`}>
             {[0, 1, 2].map((k) => (
-              <text key={k} className="lp-zzz" style={{ animationDelay: `${n * 0.5 + k * 0.7}s` }} fontFamily="var(--font-display)" fontWeight="700" fontSize={12 + k * 4} fill="#f4efe4">
+              <text key={k} className="lp-zzz" style={{ animationDelay: `${n * 0.5 + k * 0.7}s` }} fontFamily="var(--font-display)" fontWeight="700" fontSize={12 + k * 4} fill="#f3f5ff">
                 z
               </text>
             ))}
@@ -568,11 +586,11 @@ export function DayZzz() {
 
 // ---------- Simulador de divulgação ----------
 export const SHOP_KINDS = {
-  padaria: { name: "Padaria", awning: ["#e08163", "#c2552c", "#9c3f1d"], wall: C.bege },
-  bar: { name: "Bar", awning: ["#7fb79a", "#5f8778", "#4a6b5e"], wall: C.areia },
+  padaria: { name: "Padaria", awning: ["#ffb9a1", "#f08f6f", "#a8533d"], wall: C.bege },
+  bar: { name: "Bar", awning: ["#8fe3cf", "#3fa58e", "#2e7f6c"], wall: C.areia },
   loja: { name: "Loja", awning: ["#8fb0f5", "#5e7fc4", "#46629c"], wall: C.bege },
-  evento: { name: "Eventos", awning: ["#d29a44", "#b07d33", "#8a6126"], wall: C.verde },
-  salao: { name: "Salão", awning: ["#b98bd6", "#9469b0", "#74508b"], wall: C.bege },
+  evento: { name: "Eventos", awning: ["#ffe3a3", "#ffd27a", "#b88a2c"], wall: C.verde },
+  salao: { name: "Salão", awning: ["#d9d0ff", "#a597ff", "#6d5fd0"], wall: C.bege },
 } as const;
 export type ShopKind = keyof typeof SHOP_KINDS;
 
@@ -591,16 +609,16 @@ export function ShopScene({ kind, className, title, vb = "60 6 316 200" }: Scene
       {g.tile(-1, 0, 8, 4.0, C.calcada)}
       {g.tile(-1, 4.0, 8, 3, C.rua)}
       {g.box(0.6, 0.4, 0, 4.2, 2.2, 2.4, k.wall)}
-      {g.quad("L", 0.6, 2.6, 0.4, 1.8, 0.25, 1.5, "#3b4652")}
+      {g.quad("L", 0.6, 2.6, 0.4, 1.8, 0.25, 1.5, "#1a2a66")}
       {g.quad("L", 0.6, 2.6, 0.45, 1.75, 0.3, 1.45, C.janela, { opacity: 0.45 })}
-      {g.quad("L", 0.6, 2.6, 2.3, 3.0, 0, 1.4, "#5a3d27")}
-      {g.quad("L", 0.6, 2.6, 3.3, 4.0, 0.25, 1.5, "#3b4652")}
+      {g.quad("L", 0.6, 2.6, 2.3, 3.0, 0, 1.4, C.porta)}
+      {g.quad("L", 0.6, 2.6, 3.3, 4.0, 0.25, 1.5, "#1a2a66")}
       {/* toldo listrado */}
       {[0, 1, 2, 3, 4, 5, 6].map((i) => (
         <polygon
           key={i}
           points={g.pts(g.P(0.6 + i * 0.6, 2.6, 1.75), g.P(1.2 + i * 0.6, 2.6, 1.75), g.P(1.2 + i * 0.6, 3.1, 1.5), g.P(0.6 + i * 0.6, 3.1, 1.5))}
-          fill={i % 2 ? "#f4efe4" : k.awning[1]}
+          fill={i % 2 ? "#f3f5ff" : k.awning[1]}
         />
       ))}
       <text key={kind} className="lp-in-svg" transform={`matrix(0.866 0.5 0 1 ${sign[0]} ${sign[1]})`} fontFamily="var(--font-display)" fontWeight="700" fontSize="20" fill={k.awning[2]}>
@@ -613,7 +631,7 @@ export function ShopScene({ kind, className, title, vb = "60 6 316 200" }: Scene
         </g>
       ))}
       <g key={`pin-${kind}`} className="lp-pinsobe">
-        <Pin x={px} y={py} color="#d29a44">
+        <Pin x={px} y={py} color="#ffd27a">
           <path d="M1 6l1.5-4h11L15 6M2 6v8h12V6M6 14v-4h4v4" />
         </Pin>
       </g>

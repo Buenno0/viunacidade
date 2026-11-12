@@ -13,7 +13,9 @@
     "tokens": "node scripts/gerar-tokens.mjs",
     "contraste": "node scripts/contraste.mjs",
     "test:e2e": "node --test --test-concurrency=1 \"tests/e2e/*.test.mjs\"",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "ceu": "node scripts/gerar-ceu.mjs",
+    "icones": "node scripts/gerar-icones.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.132.0",

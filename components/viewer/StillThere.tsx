@@ -6,6 +6,7 @@ import { timeAgo, type PostProperties } from "@/lib/posts";
 import { Spinner } from "../ui";
 import { CheckIcon, CloseIcon } from "../ui/icons";
 import { errorMessage } from "@/lib/errors";
+import Olheiro, { NIVEL_COR } from "../landing/Olheiro";
 
 type Vote = Pick<PostProperties, "confirm_count" | "deny_count" | "expires_at" | "last_confirmed_at">;
 
@@ -81,9 +82,20 @@ export default function StillThere({ post, loggedIn, onNeedLogin, onVoted }: Pro
           {answered ? "Você confirmou que ainda está rolando" : "Você disse que acabou"}
         </p>
       )}
-      <p className="etiqueta text-ink/70">
-        {summary}
-        {post.deny_count > 0 ? ` · ${post.deny_count} disse que acabou` : ""}
+      <p className="etiqueta flex items-end gap-2 text-ink/70">
+        {post.confirm_count > 0 && (
+          // quem confirmou vira Olheiro (um por pessoa, até três): o número
+          // continua ao lado, os bonecos só dão cara à confirmação
+          <span className="flex shrink-0 items-end" aria-hidden="true">
+            {Array.from({ length: Math.min(3, post.confirm_count) }, (_, i) => (
+              <Olheiro key={i} nivel={[0, 1, 3][i]} cor={NIVEL_COR[[0, 1, 3][i]]} tam={18} className="-mr-0.5" />
+            ))}
+          </span>
+        )}
+        <span>
+          {summary}
+          {post.deny_count > 0 ? ` · ${post.deny_count} disse que acabou` : ""}
+        </span>
       </p>
       {error && <p className="text-xs text-danger">{error}</p>}
     </div>

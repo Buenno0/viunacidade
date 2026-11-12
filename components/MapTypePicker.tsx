@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { MAP_TYPES, type MapType } from "@/lib/map/style";
 import { setMapType, useMapType } from "@/lib/mapType";
-import type { Theme } from "@/lib/theme";
+import { useTheme, type Theme, type ThemeMode } from "@/lib/theme";
 import { IconButton, cx } from "./ui";
 import { FlameIcon, LayersIcon } from "./ui/icons";
 
@@ -48,8 +48,16 @@ const HEAT_OPTIONS: { id: HeatMode; label: string; hint: string }[] = [
   { id: "historico", label: "Últimos 30 dias", hint: "Onde costuma acontecer" },
 ];
 
+// O tema do mapa: pela hora (o padrão, segue o céu da cidade) ou fixo
+const CEU_OPTIONS: { id: ThemeMode; label: string }[] = [
+  { id: "hora", label: "Pela hora" },
+  { id: "dark", label: "Noite" },
+  { id: "light", label: "Dia" },
+];
+
 export default function MapTypePicker({ theme, heat, onHeat, className }: PickerProps) {
   const current = useMapType();
+  const { mode, setMode } = useTheme();
   const [open, setOpen] = useState(false);
 
   return (
@@ -63,7 +71,7 @@ export default function MapTypePicker({ theme, heat, onHeat, className }: Picker
           <div
             role="menu"
             aria-label="Tipo de mapa"
-            className="absolute right-0 top-12 z-20 w-60 rounded-none border border-line bg-surface p-2"
+            className="absolute right-0 top-12 z-20 w-60 rounded-2xl border border-line bg-surface p-2"
           >
             <p className="etiqueta px-2 pb-2 pt-1">Tipo de mapa</p>
             {MAP_TYPES.map((t) => (
@@ -76,11 +84,11 @@ export default function MapTypePicker({ theme, heat, onHeat, className }: Picker
                   setOpen(false);
                 }}
                 className={cx(
-                  "flex w-full items-center gap-3 rounded-none border p-1.5 pr-3 text-left transition",
+                  "flex w-full items-center gap-3 rounded-2xl border p-1.5 pr-3 text-left transition",
                   current === t.id ? "border-accent bg-elev" : "border-transparent hover:bg-elev",
                 )}
               >
-                <span className="h-11 w-11 shrink-0 overflow-hidden rounded-none border border-line">
+                <span className="h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-line">
                   <Thumb type={t.id} theme={theme} />
                 </span>
                 <span className="min-w-0">
@@ -97,11 +105,11 @@ export default function MapTypePicker({ theme, heat, onHeat, className }: Picker
                 aria-checked={heat === h.id}
                 onClick={() => onHeat(heat === h.id ? "off" : h.id)}
                 className={cx(
-                  "flex w-full items-center gap-3 rounded-none border p-2 pr-3 text-left transition",
+                  "flex w-full items-center gap-3 rounded-2xl border p-2 pr-3 text-left transition",
                   heat === h.id ? "border-accent bg-elev" : "border-transparent hover:bg-elev",
                 )}
               >
-                <span className={cx("grid h-9 w-9 shrink-0 place-items-center rounded-none border border-line", heat === h.id ? "text-danger" : "text-muted")}>
+                <span className={cx("grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-line", heat === h.id ? "text-danger" : "text-muted")}>
                   <FlameIcon />
                 </span>
                 <span className="min-w-0">
@@ -110,6 +118,23 @@ export default function MapTypePicker({ theme, heat, onHeat, className }: Picker
                 </span>
               </button>
             ))}
+            <p className="etiqueta px-2 pb-2 pt-3">Céu do mapa</p>
+            <div role="radiogroup" aria-label="Céu do mapa" className="grid grid-cols-3 gap-1 px-1 pb-1">
+              {CEU_OPTIONS.map((o) => (
+                <button
+                  key={o.id}
+                  role="radio"
+                  aria-checked={mode === o.id}
+                  onClick={(e) => setMode(o.id, e)}
+                  className={cx(
+                    "rounded-xl border px-2 py-2 text-xs font-medium transition",
+                    mode === o.id ? "border-accent bg-accent text-accent-ink" : "border-line text-ink hover:bg-elev",
+                  )}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
           </div>
         </>
       )}

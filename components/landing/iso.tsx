@@ -3,22 +3,31 @@ import type { ReactNode } from "react";
 // Peças de desenho isométrico (SVG puro) para as ilustrações da LP: no lugar
 // das fotos que ainda não temos. Eixo x desce para a direita, y desce para a
 // esquerda, z sobe. Desenhe de trás para a frente (x + y crescente).
+//
+// Redesenho "Noite" (11/11/2026): a cidade vista de noite, como o céu da LP.
+// O chão é uma ilha azul-marinho com borda (um diorama); os prédios usam a
+// família de cores dos Olheiros (azul, lavanda, teal, coral, telhado lilás);
+// janela acesa, poste e faixa da rua são a luz da marca (#ffd27a).
+// Cada cor de parede é [topo, face da frente, face do lado].
 
 export const C = {
-  chao: "#1a1815",
-  quadra: "#24211d",
-  calcada: "#36332d",
-  rua: "#2c2c31",
-  faixa: "#b8873d",
-  escuro: ["#3b3b43", "#2c2c33", "#222229"],
-  bege: ["#e7ddc7", "#cfc3a8", "#b4a78b"],
-  verde: ["#9cc0b0", "#7aa596", "#5f8778"],
-  areia: ["#e9c98f", "#d29a44", "#b07d33"],
-  telhado: ["#c26a2e", "#8e4a1f"],
-  janela: "#e9b65c",
-  janelaApagada: "#3a3a44",
-  copa: ["#3d7259", "#2c5a45"],
-  tronco: "#4a3a2a",
+  chao: "#16275e", // topo da ilha
+  ilha: ["#0e1a48", "#0a1438"], // as bordas da ilha (frente e lado)
+  borda: "#2f4a9a", // o fio de luz em volta do topo da ilha
+  quadra: "#1b2f6b",
+  calcada: "#22377a",
+  rua: "#0f1c4c",
+  faixa: "#ffd27a",
+  escuro: ["#4a68c4", "#2f4a9e", "#22397f"], // prédio alto: azul
+  bege: ["#d6dcf2", "#a9b5de", "#8492c6"], // lavanda clara, de luar
+  verde: ["#8fe3cf", "#5fd3b8", "#3fa58e"], // teal (o Olheiro)
+  areia: ["#ffb9a1", "#f08f6f", "#c96f53"], // coral (o Curioso)
+  telhado: ["#9d8ff2", "#7465d6"], // lilás
+  janela: "#ffd27a",
+  janelaApagada: "#1a2a66",
+  copa: ["#38b896", "#23896f"],
+  tronco: "#2a2350",
+  porta: "#1e2b6b",
 };
 
 export type Iso = ReturnType<typeof iso>;
@@ -86,7 +95,7 @@ export function iso(S: number, ox: number, oy: number) {
         <polygon points={pts(P(x, y, t), P(x + w, y, t), P(x + w, y + d / 2, t + r), P(x, y + d / 2, t + r))} fill={C.telhado[1]} />
         {box(x, y, 0, w, d, h, wall)}
         {quad("L", x, y + d, w * 0.18, w * 0.38, 0.25, 0.55, C.janela)}
-        {quad("L", x, y + d, w * 0.6, w * 0.75, 0, 0.5, "#5a3d27")}
+        {quad("L", x, y + d, w * 0.6, w * 0.75, 0, 0.5, C.porta)}
         <polygon points={pts(P(x + w, y, t), P(x + w, y + d, t), P(x + w, y + d / 2, t + r))} fill={wall[2]} />
         <polygon points={pts(P(x, y + d / 2, t + r), P(x + w, y + d / 2, t + r), P(x + w, y + d + 0.08, t - 0.05), P(x, y + d + 0.08, t - 0.05))} fill={C.telhado[0]} />
       </g>
@@ -125,12 +134,12 @@ export function iso(S: number, ox: number, oy: number) {
           const rot = along === "x" ? 30 : -30;
           return (
             <g key={u} transform={`translate(${wx.toFixed(1)} ${wy.toFixed(1)}) rotate(${rot}) scale(1 0.92)`}>
-              <ellipse rx={0.19 * S * k} ry={0.2 * S * k} fill="#17171b" />
-              <ellipse rx={0.09 * S * k} ry={0.095 * S * k} fill="#8a8f99" />
+              <ellipse rx={0.19 * S * k} ry={0.2 * S * k} fill="#0a1230" />
+              <ellipse rx={0.09 * S * k} ry={0.095 * S * k} fill="#9fadd8" />
             </g>
           );
         })}
-        {box(cx, cy, 0.48 * k, cw, cd, 0.3 * k, ["#3b4652", "#7d93a6", "#5e7488"])}
+        {box(cx, cy, 0.48 * k, cw, cd, 0.3 * k, ["#1a2a66", "#7f9be6", "#5674c8"])}
         {along === "x" ? (
           <>
             {light(x + w, y + 0.14 * k)}
@@ -156,7 +165,7 @@ export function iso(S: number, ox: number, oy: number) {
     const { hx, hy, hr } = head(x, y, k);
     return (
       <g key={key}>
-        {box(x, y, 0, 0.24 * k, 0.24 * k, 0.38 * k, ["#2a3340", "#232b36", "#1c232c"])}
+        {box(x, y, 0, 0.24 * k, 0.24 * k, 0.38 * k, ["#2a3a7a", "#22336d", "#1a2a5c"])}
         {box(x - 0.02 * k, y - 0.02 * k, 0.38 * k, 0.28 * k, 0.28 * k, 0.36 * k, [shirt, shirt, shirt])}
         <polygon
           points={pts(P(x + 0.26 * k, y - 0.02 * k, 0.38 * k), P(x + 0.26 * k, y + 0.26 * k, 0.38 * k), P(x + 0.26 * k, y + 0.26 * k, 0.74 * k), P(x + 0.26 * k, y - 0.02 * k, 0.74 * k))}
@@ -182,9 +191,9 @@ export function iso(S: number, ox: number, oy: number) {
     const [tx, ty] = P(x, y, 1.6);
     return (
       <g key={key}>
-        <line x1={bx} y1={by} x2={tx} y2={ty} stroke="#55534d" strokeWidth={0.07 * S} />
-        <circle cx={tx} cy={ty} r={0.5 * S} fill="#f0c46a" opacity=".12" className={glow ?? "lp-halo"} />
-        <circle cx={tx} cy={ty} r={0.11 * S} fill="#f6d58c" />
+        <line x1={bx} y1={by} x2={tx} y2={ty} stroke="#3a55a8" strokeWidth={0.07 * S} />
+        <circle cx={tx} cy={ty} r={0.5 * S} fill="#ffd27a" opacity=".16" className={glow ?? "lp-halo"} />
+        <circle cx={tx} cy={ty} r={0.11 * S} fill="#fff1c4" />
       </g>
     );
   };
@@ -195,8 +204,8 @@ export function iso(S: number, ox: number, oy: number) {
     const r = 0.13 * S;
     return (
       <g key={key}>
-        <polygon points={`${bx - r},${by} ${bx + r},${by} ${tx},${ty}`} fill="#e27a3f" />
-        <rect x={bx - r * 0.62} y={by - (by - ty) * 0.52} width={r * 1.24} height={(by - ty) * 0.14} fill="#f4efe4" />
+        <polygon points={`${bx - r},${by} ${bx + r},${by} ${tx},${ty}`} fill="#ff9a6a" />
+        <rect x={bx - r * 0.62} y={by - (by - ty) * 0.52} width={r * 1.24} height={(by - ty) * 0.14} fill="#f3f5ff" />
       </g>
     );
   };
@@ -204,12 +213,12 @@ export function iso(S: number, ox: number, oy: number) {
   return { S, P, pts, tile, box, quad, windows, house, tree, car, person, head, lamp, cone };
 }
 
-// Quadra base: chão escuro com a borda tracejada da cidade
+// Quadra base: a ilha da cidade, com borda de diorama e um fio de luz em volta
 export function Ground({ g, n = 10 }: { g: Iso; n?: number }) {
   return (
     <>
-      {g.tile(0, 0, n, n, C.chao)}
-      <polygon points={g.pts(g.P(0, 0), g.P(n, 0), g.P(n, n), g.P(0, n))} fill="none" stroke={C.faixa} strokeWidth={1.4} strokeDasharray="6 6" opacity=".8" />
+      {g.box(0, 0, -0.55, n, n, 0.55, [C.chao, C.ilha[0], C.ilha[1]])}
+      <polygon points={g.pts(g.P(0, 0), g.P(n, 0), g.P(n, n), g.P(0, n))} fill="none" stroke={C.borda} strokeWidth={1.4} strokeLinejoin="round" />
     </>
   );
 }
@@ -222,7 +231,7 @@ export function Road({ g, x, y, w, d }: { g: Iso; x: number; y: number; w: numbe
   return (
     <>
       {g.tile(x, y, w, d, C.rua, 0.005)}
-      <line x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} stroke="#6d6a62" strokeWidth={1.2} strokeDasharray="5 6" />
+      <line x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} stroke={C.faixa} strokeWidth={1.2} strokeDasharray="5 6" opacity=".55" />
     </>
   );
 }

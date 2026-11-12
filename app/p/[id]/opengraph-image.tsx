@@ -5,7 +5,7 @@ import { CITY } from "@/lib/city";
 import { photoUrl } from "@/lib/media";
 import { timeLeftShort } from "@/lib/posts";
 import { getPublicPost } from "@/lib/server/publicPost";
-import { CITY_PATH, PIN_PATH } from "@/components/ui/Mark";
+import { marcaSvg } from "@/components/ui/Mark";
 
 // A prévia que o WhatsApp mostra: a foto inteira, com a categoria, a legenda
 // e quanto falta para sumir. O ImageResponse não lê WebP, então a foto passa
@@ -14,12 +14,12 @@ export const alt = "Registro no Viu na Cidade";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const GOLD = "#d29a44";
-const BASALT = "#0c0a08";
-const INK = "#f4efe4";
+const GOLD = "#ffd27a"; // a luz da janela acesa (redesign Noite)
+const BASALT = "#0a1230"; // o céu de noite
+const INK = "#f3f5ff";
 
 const markSvg = `data:image/svg+xml;utf8,${encodeURIComponent(
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="2 8 96 84"><path d="${CITY_PATH}" fill="${GOLD}" stroke="${GOLD}" stroke-width="2" stroke-linejoin="round"/><path d="${PIN_PATH}" fill="${BASALT}"/><circle cx="58" cy="27" r="3.6" fill="${GOLD}"/></svg>`,
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120">${marcaSvg()}</svg>`,
 )}`;
 
 async function photoData(path: string) {
@@ -74,7 +74,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
                 : "O que está acontecendo agora"}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 28 }}>
-            <img src={markSvg} width={64} height={56} alt="" />
+            <img src={markSvg} width={47} height={56} alt="" />
             <div style={{ display: "flex", fontSize: 30, fontWeight: 700 }}>Viu na Cidade</div>
             <div style={{ display: "flex", fontSize: 24, color: "#a99a84", letterSpacing: 3 }}>{`${CITY.name.toUpperCase()} · ${CITY.uf}`}</div>
           </div>

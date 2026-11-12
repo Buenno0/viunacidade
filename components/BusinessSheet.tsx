@@ -14,7 +14,7 @@ type Props = {
   onSaved: (b: Business) => void;
 };
 
-const field = "w-full rounded-none border border-line bg-bg px-3 py-2 text-base outline-none transition focus:border-accent";
+const field = "w-full rounded-xl border border-line bg-bg px-3 py-2 text-base outline-none transition focus:border-accent";
 
 // O pedido do comerciante. O ponto é onde a pessoa está agora: é dali (até
 // 150 m) que as divulgações vão poder ser feitas, e a moderação confere.
@@ -23,7 +23,7 @@ export default function BusinessSheet({ business, onClose, onSaved }: Props) {
   return (
     <Sheet eyebrow="Estabelecimento" title={business?.name ?? "Divulgue seu estabelecimento"} onClose={onClose}>
       {business && (
-        <div className="mb-5 flex flex-col gap-2 rounded-none border border-line bg-bg p-3 text-sm">
+        <div className="mb-5 flex flex-col gap-2 rounded-2xl border border-line bg-bg p-3 text-sm">
           <p>
             Situação: <span className={cx("font-medium", BUSINESS_STATUS[business.status].tone)}>{BUSINESS_STATUS[business.status].label}</span>
           </p>
@@ -99,7 +99,7 @@ function BusinessForm({ business, onSaved }: { business: Business | null; onSave
         </label>
       </div>
 
-      <div className="flex items-start gap-3 rounded-none border border-line bg-bg px-3 py-2.5 text-sm">
+      <div className="flex items-start gap-3 rounded-2xl border border-line bg-bg px-3 py-2.5 text-sm">
         <span className="mt-0.5">
           {geoError ? <AlertIcon className="text-danger" /> : position === null ? <Spinner /> : <PinIcon className={usable ? "text-ok" : "text-warn"} />}
         </span>

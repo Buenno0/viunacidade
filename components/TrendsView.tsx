@@ -99,7 +99,7 @@ export default function TrendsView({ posts, onOpen }: Props) {
           {/* O primeiro lugar, grande */}
           <button
             onClick={() => onOpen(first.properties.id, ids)}
-            className="sala-escura relative overflow-hidden rounded-none border border-line bg-black text-left"
+            className="sala-escura relative overflow-hidden rounded-2xl border border-line bg-black text-left"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={photoUrl(first.properties.photo_path)} alt="" className="aspect-[16/10] w-full object-cover" />
@@ -137,10 +137,10 @@ export default function TrendsView({ posts, onOpen }: Props) {
                   <li key={p.id}>
                     <button
                       onClick={() => onOpen(p.id, ids)}
-                      className="flex w-full items-center gap-3 rounded-none border border-line bg-surface p-2 pr-3 text-left transition hover:bg-elev"
+                      className="flex w-full items-center gap-3 rounded-2xl border border-line bg-surface p-2 pr-3 text-left transition hover:bg-elev"
                     >
                       <span className="num w-7 shrink-0 text-center text-base text-muted">{i + 2}</span>
-                      <span className="sala-escura h-14 w-14 shrink-0 overflow-hidden rounded-none bg-elev">
+                      <span className="sala-escura h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-elev">
                         <Thumb path={p.photo_path} className="h-full w-full object-cover" />
                       </span>
                       <span className="min-w-0 flex-1">

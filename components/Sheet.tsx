@@ -33,7 +33,7 @@ export default function Sheet({
         role="dialog"
         aria-label={title}
         // dvh desconta as barras do navegador do celular (vh não desconta)
-        className={`relative flex max-h-[calc(100dvh-0.75rem)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl border border-line bg-surface sm:max-h-[90dvh] sm:rounded-none`}
+        className={`relative flex max-h-[calc(100dvh-0.75rem)] w-full max-w-lg flex-col overflow-hidden rounded-t-[26px] border border-line bg-surface shadow-[0_-20px_60px_rgba(5,10,30,0.45)] sm:max-h-[90dvh] sm:rounded-3xl`}
       >
         <div className={`min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-5 ${footer ? "pb-4" : "pb-[max(1.25rem,env(safe-area-inset-bottom))]"}`}>
         <header className="mb-4 flex items-start justify-between gap-3">

@@ -26,7 +26,9 @@ export function dayLabel(day: string, today: string) {
 }
 export const shortDay = (day: string) => day.slice(8, 10) + "/" + day.slice(5, 7);
 
-// A régua dos 30 dias. Dia sem nada guardado fica apagado.
+// A régua dos 30 dias é um horizonte (V7 do canvas): cada dia é um prédio, a
+// altura e as janelas acesas contam o que ficou guardado. Dia vazio fica só o
+// contorno tracejado e não dá para tocar.
 export function HistoryRuler({
   counts,
   day,
@@ -44,25 +46,46 @@ export function HistoryRuler({
     return Array.from({ length: HISTORY_DAYS }, (_, i) => new Date(Date.UTC(y, m - 1, d - i)).toISOString().slice(0, 10));
   }, [today]);
   return (
-    <div ref={faixa} className="no-scrollbar -mx-4 flex select-none gap-2 overflow-x-auto px-4 pb-1" role="listbox" aria-label="Dia do histórico">
+    <div ref={faixa} className="no-scrollbar -mx-3 flex select-none items-end gap-1 overflow-x-auto px-3 pb-0.5" role="listbox" aria-label="Dia do histórico">
       {days.map((d) => {
         const n = counts[d] ?? 0;
         const active = d === day;
+        const janelas = Math.min(n, 12);
+        const linhas = Math.ceil(janelas / 2);
+        const alto = n ? 14 + Math.max(1, linhas) * 10 : 12;
+        const topo = 90 - alto;
+        const corpo = active ? "#ffd27a" : n ? "#1a2756" : "transparent";
+        const luz = active ? "#0a1230" : "#ffd27a";
+        const rotulo = dayLabel(d, today);
+        const [nome, data] = rotulo.includes(" ") ? rotulo.split(" ") : [rotulo, ""];
         return (
           <button
             key={d}
             role="option"
             aria-selected={active}
+            aria-label={`${rotulo}, ${n} ${n === 1 ? "guardado" : "guardados"}`}
             disabled={n === 0}
             onClick={() => onPick(d)}
-            className={cx(
-              "flex shrink-0 flex-col items-center gap-0.5 rounded-none border px-3 py-1.5 text-xs transition",
-              active ? "border-accent bg-accent text-accent-ink" : "border-line bg-surface text-ink hover:bg-elev",
-              n === 0 && "opacity-40",
-            )}
+            className="flex w-10 shrink-0 flex-col items-center gap-1 transition active:translate-y-px"
           >
-            <span className="whitespace-nowrap font-medium">{dayLabel(d, today)}</span>
-            <span className={cx("num text-[10px]", active ? "text-accent-ink" : "text-muted")}>{n}</span>
+            <svg viewBox="0 0 40 90" width="40" height="90" aria-hidden="true">
+              {active && <path d={`M6 ${topo + 1}L20 ${topo - 8}L34 ${topo + 1}Z`} fill={corpo} />}
+              <rect
+                x="6"
+                y={topo}
+                width="28"
+                height={alto}
+                rx="4"
+                fill={corpo}
+                stroke={n ? "none" : "#2e3f7a"}
+                strokeDasharray={n ? undefined : "3 3"}
+              />
+              {Array.from({ length: janelas }, (_, k) => (
+                <rect key={k} x={12 + (k % 2) * 10} y={topo + 8 + Math.floor(k / 2) * 10} width="6" height="6" rx="1.5" fill={luz} />
+              ))}
+            </svg>
+            <span className={cx("text-xs font-bold", active ? "text-luz" : n ? "text-ink" : "text-muted/70")}>{nome}</span>
+            <span className={cx("num text-[11px] leading-none", active ? "text-luz" : "text-muted", !n && "opacity-70")}>{data || "\u00a0"}</span>
           </button>
         );
       })}
@@ -82,7 +105,7 @@ export function HistoryList({ posts, onOpen }: { posts: PostFeature[]; onOpen: (
           <li key={p.id}>
             <button
               onClick={() => onOpen(p.id, ids)}
-              className="sala-escura relative block w-full overflow-hidden rounded-none border border-line bg-black text-left"
+              className="sala-escura relative block w-full overflow-hidden rounded-2xl border border-line bg-black text-left"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img

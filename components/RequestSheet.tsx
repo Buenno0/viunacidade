@@ -46,7 +46,7 @@ export default function RequestSheet({ request, answers, loggedIn, onClose, onAn
                 <button
                   key={f.properties.id}
                   onClick={() => onOpenAnswer(f.properties.id)}
-                  className="h-24 w-24 shrink-0 overflow-hidden rounded-none border border-line bg-elev"
+                  className="h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-line bg-elev"
                   aria-label={`Ver resposta de ${timeAgo(f.properties.created_at)}`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -15,7 +15,7 @@ import { ALL_CATEGORY_KEYS, CATEGORIES, type Category } from "@/lib/categories";
 import { formatDistance, trendingRanks, type PostFeature, type PostsCollection, type RequestFeature } from "@/lib/posts";
 import type { Business } from "@/lib/business";
 import BusinessSheet from "./BusinessSheet";
-import { HistoryList, HistoryRuler, cityDay, shortDay } from "./HistoryView";
+import { HistoryList, HistoryRuler, cityDay, dayLabel } from "./HistoryView";
 import { useTheme } from "@/lib/theme";
 import { useMapType } from "@/lib/mapType";
 import AccountSheet from "./AccountSheet";
@@ -25,7 +25,9 @@ import AlertsSheet from "./AlertsSheet";
 import AskPanel from "./AskPanel";
 import AuthSheet, { PENDING_TERMS_KEY, PENDING_THEN_KEY } from "./AuthSheet";
 import LiveStrip from "./LiveStrip";
-import AlertStrip from "./ui/AlertStrip";
+import { AlertSheet } from "./ui/AlertStrip";
+import CeuDoApp, { BotaoConta, ChipTopo, ehTempestade } from "./CeuDoApp";
+import Olheiro from "./landing/Olheiro";
 import MapTypePicker, { type HeatMode } from "./MapTypePicker";
 import LandmarkSheet from "./LandmarkSheet";
 import NewPostSheet from "./NewPostSheet";
@@ -36,23 +38,18 @@ import { dismiss, locateCity, onLocationGranted, silentPosition, wasDismissed, t
 import PostViewer from "./PostViewer";
 import RequestSheet from "./RequestSheet";
 import TrendsView from "./TrendsView";
-import Mark from "./ui/Mark";
-import BetaTag from "./ui/BetaTag";
-import { Button, Chip, EmptyState, IconButton, Spinner, cx } from "./ui";
+import { Button, EmptyState, IconButton, cx } from "./ui";
 import { useDragScroll } from "@/lib/useDragScroll";
 import {
   ArchiveIcon,
-  BellIcon,
   CameraIcon,
   CategoryIcon,
+  CheckIcon,
   FlagIcon,
   LocateIcon,
   MapIcon,
-  MoonIcon,
   QuestionIcon,
-  SunIcon,
   TrendIcon,
-  UserIcon,
 } from "./ui/icons";
 
 // MapLibre usa window/WebGL, então só roda no navegador
@@ -98,7 +95,7 @@ async function fetchRequests(): Promise<RequestFeature[]> {
 export default function Home() {
   const faixa = useDragScroll();
   const supabase = getSupabase();
-  const { theme, toggle } = useTheme();
+  const { theme } = useTheme();
   const mapType = useMapType();
   const params = useSearchParams();
   const [posts, setPosts] = useState<PostFeature[] | null>(null);
@@ -112,6 +109,9 @@ export default function Home() {
   const termsOk = Boolean(session && termsUserId === session.user.id);
   const [panel, setPanel] = useState<Panel>(null);
   const [asking, setAsking] = useState(false);
+  const [alertaAberto, setAlertaAberto] = useState<CityAlert | null>(null);
+  // altura medida do céu (px): o que fica embaixo dele se posiciona por ela
+  const [alturaTopo, setAlturaTopo] = useState(180);
   const [tab, setTab] = useState<Tab>(params.get("historico") ? "historico" : "mapa");
   const [today] = useState(() => cityDay(new Date()));
   const [historyCounts, setHistoryCounts] = useState<Record<string, number> | null>(null);
@@ -601,6 +601,19 @@ export default function Home() {
   // o mais grave valendo agora; se nada vale, o mais grave que vem aí
   const aviso = principal(alerts);
 
+  // O horizonte: uma janela acesa por post no ar (no histórico, por guardado)
+  const acesas = inHistory ? (historyPosts?.length ?? 0) : (posts?.length ?? 0);
+  const rotuloHorizonte = inHistory
+    ? acesas
+      ? `${acesas} ${acesas === 1 ? "guardado" : "guardados"}`
+      : "nada guardado"
+    : posts === null
+      ? "carregando"
+      : acesas
+        ? `${acesas} no ar`
+        : "nada no ar";
+  const topo = `${Math.round(alturaTopo)}px`;
+
   return (
     <main className="relative h-dvh w-full overflow-hidden bg-bg">
       <CityMap
@@ -631,99 +644,70 @@ export default function Home() {
         onMove={(c) => (center.current = c)}
       />
 
-      {/* Topo: marca, cidade, status ao vivo e filtros */}
-      {/* Sem pointer-events-none aqui: no iPhone, rolagem horizontal dentro de um
-          elemento com esse ancestral não rola (a barra de filtros travava) */}
-      <header className="absolute inset-x-0 top-0 z-10 px-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
-        <div className="pointer-events-auto mx-auto flex max-w-lg items-center gap-3 rounded-none border border-line bg-surface/90 py-2 pl-3 pr-2 backdrop-blur">
-          <Mark size={40} className="shrink-0" />
-          <div className="min-w-0 flex-1">
-            <p className="flex items-center gap-2 font-display text-base font-bold leading-tight">
-              Viu na Cidade <BetaTag />
-            </p>
-            <p className="etiqueta truncate">
-              {CITY.name} · {CITY.uf}
-            </p>
-          </div>
-          <div
-            className="flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1"
-            aria-live="polite"
-            aria-label={`${posts?.length ?? 0} posts ao vivo`}
-          >
-            {posts === null ? (
-              <Spinner className="text-xs" />
-            ) : (
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-danger opacity-60" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-danger" />
-              </span>
-            )}
-            <span className="etiqueta hidden text-ink sm:inline">ao vivo</span>
-            <span className="num text-xs text-ink">{String(posts?.length ?? 0).padStart(2, "0")}</span>
-          </div>
-          <IconButton label={theme === "dark" ? "Tema claro" : "Tema escuro"} onClick={toggle}>
-            {theme === "dark" ? <SunIcon /> : <MoonIcon />}
-          </IconButton>
-        </div>
-
-        {!asking && (
+      {/* Topo: só peças flutuando sobre o mapa. A pílula da marca traz o céu
+          da hora real em miniatura (uma janela acesa por post no ar), o
+          relógio e o aviso do INMET; embaixo dela, os filtros. */}
+      <CeuDoApp
+        acesas={acesas}
+        rotulo={rotuloHorizonte}
+        ultimos={inHistory ? [] : (posts ?? []).filter((f) => !f.properties.processing).slice(0, 3)}
+        onAbrirPost={(id) => openViewer(id)}
+        carregando={!inHistory && posts === null}
+        aviso={aviso}
+        onAviso={() => aviso && setAlertaAberto(aviso)}
+        onAlertas={openAlerts}
+        dia={inHistory && historyDay ? dayLabel(historyDay, today) : null}
+        onAltura={setAlturaTopo}
+        conta={<BotaoConta progress={session ? progress : null} onClick={openAccount} />}
+      >
+        {!asking && tab === "mapa" && (
           <nav
             aria-label="Filtrar por categoria"
             ref={faixa}
-            className="no-scrollbar mx-auto mt-2 flex max-w-lg touch-pan-x select-none items-center gap-2 overflow-x-auto overscroll-x-contain pb-1"
+            className="no-scrollbar -m-2 flex max-w-[calc(100%+1rem)] touch-pan-x select-none items-center gap-1.5 overflow-x-auto overscroll-x-contain p-2"
           >
-            {/* Mapa | Trends | Histórico */}
-            <div role="tablist" className="flex shrink-0 rounded-full border border-line bg-surface/90 p-0.5 backdrop-blur">
-              {(
-                [
-                  ["mapa", "Mapa", MapIcon],
-                  ["trends", "Trends", TrendIcon],
-                  ["historico", "Histórico", ArchiveIcon],
-                ] as const
-              ).map(([id, label, Icon]) => (
-                <button
-                  key={id}
-                  role="tab"
-                  aria-selected={tab === id}
-                  onClick={() => pickTab(id)}
-                  className={cx(
-                    "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs transition",
-                    tab === id ? "bg-accent font-medium text-accent-ink" : "text-muted hover:text-ink",
-                  )}
-                >
-                  <Icon width="1.1em" height="1.1em" /> {label}
-                </button>
-              ))}
-            </div>
-            {tab === "mapa" && (
-              <Chip active={filter === null} onClick={() => setFilter(null)} className="shrink-0">
-                Tudo
-              </Chip>
-            )}
-            {inHistory && historyDay && (
-              <span className="tag shrink-0 border border-line bg-surface/90 text-ink">Histórico · {shortDay(historyDay)}</span>
-            )}
-            {inHistory && historyPosts && historyPosts.length > 0 && (
-              <Chip active={historyList} onClick={() => setHistoryList((v) => !v)} className="shrink-0">
-                {historyList ? "Ver no mapa" : "Lista"}
-              </Chip>
-            )}
-            {tab === "mapa" && ALL_CATEGORY_KEYS.filter((k) => counts[k]).map((k) => (
-              <Chip key={k} active={filter === k} onClick={() => setFilter(filter === k ? null : k)} className="shrink-0">
+            {/* os filtros sobre o mapa, no acabamento da pílula do topo */}
+            <ChipTopo active={filter === null} onClick={() => setFilter(null)}>
+              Tudo
+            </ChipTopo>
+            {ALL_CATEGORY_KEYS.filter((k) => counts[k]).map((k) => (
+              <ChipTopo key={k} active={filter === k} onClick={() => setFilter(filter === k ? null : k)}>
                 <CategoryIcon category={k} />
                 {CATEGORIES[k].label}
                 <span className="num opacity-70">{counts[k]}</span>
-              </Chip>
+              </ChipTopo>
             ))}
           </nav>
         )}
-        {tab === "mapa" && !asking && <AlertStrip alerts={alerts} />}
-      </header>
+        {inHistory && historyPosts && historyPosts.length > 0 && (
+          <div role="group" aria-label="Como ver o dia" className="flex w-fit rounded-full border-[1.5px] border-white/15 bg-[#0f1a44] p-[3px] shadow-[0_6px_16px_rgba(0,0,0,0.45)]">
+            {(
+              [
+                [false, "Ver no mapa"],
+                [true, "Lista"],
+              ] as const
+            ).map(([lista, label]) => (
+              <button
+                key={label}
+                aria-pressed={historyList === lista}
+                onClick={() => setHistoryList(lista)}
+                className={cx(
+                  "h-[30px] rounded-full px-3.5 text-[13px] transition",
+                  historyList === lista ? "bg-[#ffd27a] font-bold text-[#0a1230]" : "font-semibold text-[#c4cbe8] hover:text-white",
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+      </CeuDoApp>
 
       {tab === "trends" && (
         <section
           aria-label="Trends"
-          className="absolute inset-0 z-[9] overflow-y-auto bg-bg px-4 pb-32 pt-[calc(max(0.75rem,env(safe-area-inset-top))+7.5rem)]"
+          className="absolute inset-0 z-[9] overflow-y-auto bg-bg px-4 pb-48 pt-[calc(var(--topo)+1rem)]"
+          style={{ "--topo": topo } as React.CSSProperties}
         >
           <div className="mx-auto max-w-lg">
             <TrendsView posts={posts ?? []} onOpen={(id, ids) => openViewer(id, ids)} />
@@ -734,7 +718,8 @@ export default function Home() {
       {inHistory && historyList && historyPosts && (
         <section
           aria-label="Histórico do dia"
-          className="absolute inset-0 z-[9] overflow-y-auto bg-bg px-4 pb-40 pt-[calc(max(0.75rem,env(safe-area-inset-top))+7.5rem)]"
+          className="absolute inset-0 z-[9] overflow-y-auto bg-bg px-4 pb-56 pt-[calc(var(--topo)+1rem)]"
+          style={{ "--topo": topo } as React.CSSProperties}
         >
           <div className="mx-auto max-w-lg">
             <HistoryList posts={historyPosts} onOpen={(id, ids) => openViewer(id, ids)} />
@@ -742,17 +727,17 @@ export default function Home() {
         </section>
       )}
 
-      <div className={cx("absolute right-3 top-40 z-20 flex flex-col gap-2", (tab === "trends" || (inHistory && historyList)) && "hidden")}>
-        <IconButton label="Minha localização" onClick={locate} className="h-11 w-11">
+      <div
+        className={cx(
+          "absolute right-3 z-20 flex flex-col gap-2 transition-[top] duration-300",
+          (tab === "trends" || (inHistory && historyList)) && "hidden",
+        )}
+        style={{ top: `calc(${topo} + 0.75rem)` }}
+      >
+        <IconButton label="Minha localização" onClick={locate} className="h-11 w-11 shadow-[0_6px_16px_rgba(5,10,30,0.25)]">
           <LocateIcon />
         </IconButton>
         <MapTypePicker theme={theme} heat={heatMode} onHeat={chooseHeat} />
-        <IconButton label="Alertas perto de você" onClick={openAlerts} className="h-11 w-11">
-          <BellIcon />
-        </IconButton>
-        <IconButton label="Minha conta" onClick={openAccount} className="h-11 w-11">
-          <UserIcon />
-        </IconButton>
         {isAdmin && (
           <Link
             href="/admin"
@@ -778,7 +763,7 @@ export default function Home() {
       {/* Estado vazio / erro, no meio do mapa */}
       {!asking && tab === "mapa" && (error || (posts !== null && visible.length === 0 && requests.length === 0 && heatMode === "off")) && (
         <div className="pointer-events-none absolute inset-x-0 top-1/2 z-10 -translate-y-1/2 px-6">
-          <div className="pointer-events-auto mx-auto max-w-xs">
+          <div className="light pointer-events-auto mx-auto max-w-xs">
             {error ? (
               <EmptyState title="Sem sinal" action={<Button variant="secundario" onClick={loadPosts}>Tentar de novo</Button>}>
                 {error}
@@ -792,6 +777,7 @@ export default function Home() {
               // Com aviso do tempo valendo, a tela vazia deixa de informar e
               // passa a pedir: é o momento em que a pessoa tem o que fotografar.
               <EmptyState
+                topo={<Olheiro nivel={progress ? progress.level - 1 : 1} tam={40} />}
                 title={aviso.live ? `${aviso.kind} na cidade` : `${aviso.kind} a caminho`}
                 action={
                   <Button variant="secundario" onClick={startAsk}>
@@ -803,6 +789,7 @@ export default function Home() {
               </EmptyState>
             ) : (
               <EmptyState
+                topo={<Olheiro nivel={progress ? progress.level - 1 : 1} tam={40} />}
                 title="Tudo calmo por aqui"
                 action={
                   <Button variant="secundario" onClick={startAsk}>
@@ -840,35 +827,86 @@ export default function Home() {
             />
           </footer>
         </>
-      ) : inHistory ? (
-        <footer className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-bg via-bg/70 to-transparent px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-10">
-          <div className="pointer-events-auto mx-auto max-w-lg">
-            <p className="etiqueta mb-2">Últimos 30 dias · só o que quem postou escolheu guardar</p>
-            <HistoryRuler
-              counts={historyCounts ?? {}}
-              day={historyDay}
-              today={today}
-              onPick={(d) => {
-                setHistoryPosts(null);
-                setHistoryDay(d);
-              }}
-            />
-          </div>
-        </footer>
       ) : (
-        <footer className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-bg via-bg/70 to-transparent px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-10">
-          <div className="pointer-events-auto mx-auto max-w-lg">
-            {tab === "mapa" && <LiveStrip posts={ready.slice(0, 20)} seen={seen} onOpen={(id) => openViewer(id)} />}
-            <div className="mt-3 flex gap-2">
-              <Button size="lg" variant="secundario" onClick={startAsk} aria-label="Perguntar: alguém aí?" className="px-4">
-                <QuestionIcon />
-                <span className="hidden sm:inline">Alguém aí?</span>
-              </Button>
-              <Button size="lg" onClick={startPost} className="flex-1 whitespace-nowrap">
-                <CameraIcon />
-                Registrar<span className="hidden sm:inline"> o que está rolando</span>
-              </Button>
+        <footer className="pointer-events-none absolute inset-x-0 bottom-0 z-10 px-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <div
+            className={cx(
+              "pointer-events-auto mx-auto flex max-w-lg flex-col gap-3 rounded-[26px] border p-3 pt-3",
+              inHistory
+                ? "sala-escura border-[#2e3f7a] bg-[#111b40] text-ink shadow-[0_-10px_40px_rgba(2,6,24,0.5)]"
+                : "light border-line bg-surface text-ink shadow-[0_-10px_40px_rgba(2,6,24,0.35)]",
+            )}
+          >
+            {/* Mapa | Trends | Histórico: embaixo, onde o polegar alcança (T1) */}
+            <div role="tablist" aria-label="Seções" className={cx("grid grid-cols-3 gap-0.5 rounded-full p-1", inHistory ? "bg-[#0a1230]" : "bg-elev")}>
+              {(
+                [
+                  ["mapa", "Mapa", MapIcon],
+                  ["trends", "Trends", TrendIcon],
+                  ["historico", "Histórico", ArchiveIcon],
+                ] as const
+              ).map(([id, label, Icon]) => (
+                <button
+                  key={id}
+                  role="tab"
+                  aria-selected={tab === id}
+                  onClick={() => pickTab(id)}
+                  className={cx(
+                    "inline-flex h-9 items-center justify-center gap-1.5 rounded-full text-sm transition",
+                    tab === id
+                      ? inHistory
+                        ? "bg-white font-bold text-[#0a1230]"
+                        : "bg-[#0a1230] font-bold text-white"
+                      : "font-semibold text-ink/80 hover:text-ink",
+                  )}
+                >
+                  <Icon width="1.05em" height="1.05em" /> {label}
+                </button>
+              ))}
             </div>
+
+            {inHistory ? (
+              <>
+                <div className="px-1">
+                  <p className="font-display text-[17px] font-medium leading-tight">Últimos 30 dias</p>
+                  <p className="text-xs font-semibold text-muted">Só o que quem postou escolheu guardar</p>
+                </div>
+                <HistoryRuler
+                  counts={historyCounts ?? {}}
+                  day={historyDay}
+                  today={today}
+                  onPick={(d) => {
+                    setHistoryPosts(null);
+                    setHistoryDay(d);
+                  }}
+                />
+              </>
+            ) : (
+              <>
+                {tab === "mapa" && <LiveStrip posts={ready.slice(0, 20)} seen={seen} onOpen={(id) => openViewer(id)} />}
+                <div className="flex gap-2">
+                  <button
+                    onClick={startAsk}
+                    aria-label="Perguntar: alguém aí?"
+                    className="inline-flex h-[52px] shrink-0 items-center justify-center gap-2 rounded-[18px] bg-elev px-4 text-[15px] font-bold text-ink transition active:translate-y-px"
+                  >
+                    <span className="grid h-[22px] w-[22px] place-items-center rounded-full bg-[#0a1230] font-display text-[13px] font-bold text-white">?</span>
+                    Alguém aí?
+                  </button>
+                  <button
+                    onClick={startPost}
+                    className="inline-flex h-[52px] flex-1 items-center justify-center gap-2.5 whitespace-nowrap rounded-[18px] bg-[#0a1230] text-base font-bold text-white transition active:translate-y-px"
+                  >
+                    <span className="grid h-[30px] w-[30px] place-items-center rounded-[10px] bg-luz text-luz-ink">
+                      <CameraIcon width="17" height="17" />
+                    </span>
+                    <span>
+                      Registrar<span className="hidden sm:inline"> o que está rolando</span>
+                    </span>
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </footer>
       )}
@@ -898,20 +936,31 @@ export default function Home() {
       )}
 
       {toast && (
-        <div className="absolute inset-x-0 top-36 z-30 flex justify-center px-4">
+        <div
+          className="absolute inset-x-0 z-30 flex justify-center px-4"
+          style={{ top: `calc(${topo} + 0.75rem)` }}
+        >
           <button
             onClick={() => {
               if (toast.postId) openViewer(toast.postId);
               setToast(null);
             }}
-            className="flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm"
+            className="light flex max-w-full items-center gap-2 rounded-full border border-line bg-surface py-2 pl-2 pr-4 text-sm font-bold text-ink shadow-[0_12px_30px_rgba(2,6,24,0.45)]"
           >
-            <span className="h-2 w-2 shrink-0 rounded-full bg-accent" />
-            {toast.text}
+            {toast.text.startsWith("No ar") || toast.text.startsWith("Publicado") ? (
+              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#5bd1b5] text-[#0a1230]">
+                <CheckIcon width="14" height="14" strokeWidth={2.6} />
+              </span>
+            ) : (
+              <span className="ml-1.5 h-2 w-2 shrink-0 rounded-full bg-luz" />
+            )}
+            <span className="min-w-0 text-left">{toast.text}</span>
             {toast.postId && <span className="etiqueta text-ink underline decoration-muted underline-offset-4">ver</span>}
           </button>
         </div>
       )}
+
+      {alertaAberto && <AlertSheet alert={alertaAberto} onClose={() => setAlertaAberto(null)} />}
 
       {panel?.kind === "viewer" && viewerPosts.length > 0 && (
         <PostViewer
@@ -1045,6 +1094,7 @@ export default function Home() {
           initialPhoto={panel.photo ?? null}
           request={panel.request}
           business={business?.status === "approved" ? business : null}
+          sugerida={ehTempestade(aviso) ? "alagamento" : null}
           onClose={() => setPanel(null)}
           onOutOfArea={(at) => {
             setPanel(null);

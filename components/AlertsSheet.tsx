@@ -153,7 +153,7 @@ export default function AlertsSheet({ getMapCenter, onClose, onSaved }: Props) {
           </div>
         </fieldset>
 
-        <label className="flex items-center justify-between gap-3 rounded-none border border-line bg-bg px-3 py-2.5 text-sm">
+        <label className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-bg px-3 py-2.5 text-sm">
           <span>
             Pedidos &quot;Alguém aí?&quot; perto
             <span className="block text-xs text-muted">Quando alguém pedir uma foto da sua área</span>

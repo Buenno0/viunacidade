@@ -22,7 +22,7 @@ export function Button({
   return (
     <button
       className={cx(
-        "inline-flex items-center justify-center gap-2 rounded-none transition active:translate-y-px disabled:opacity-50 disabled:pointer-events-none",
+        "inline-flex items-center justify-center gap-2 rounded-[12px_12px_12px_4px] transition active:translate-y-px disabled:opacity-50 disabled:pointer-events-none",
         size === "lg" ? "px-5 py-3 text-base" : "px-4 py-2 text-sm",
         VARIANTS[variant],
         className,
@@ -74,11 +74,13 @@ export function Spinner({ className }: { className?: string }) {
   );
 }
 
-export function EmptyState({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
+// topo: algo empoleirado na borda de cima do cartão (o Olheiro, no mapa vazio)
+export function EmptyState({ title, children, action, topo }: { title: string; children?: ReactNode; action?: ReactNode; topo?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-none border border-line bg-surface px-6 py-5 text-center">
-      <p className="font-display text-lg font-semibold">{title}</p>
-      {children && <p className="text-sm text-muted">{children}</p>}
+    <div className="relative flex flex-col items-center gap-2 rounded-[24px_24px_24px_7px] border border-line bg-surface px-6 py-5 text-center text-ink shadow-[0_20px_50px_rgba(5,10,30,0.35)]">
+      {topo && <div className="pointer-events-none absolute -top-[52px] right-6">{topo}</div>}
+      <p className="font-display text-xl font-medium tracking-tight">{title}</p>
+      {children && <p className="text-sm leading-relaxed text-muted">{children}</p>}
       {action && <div className="mt-2">{action}</div>}
     </div>
   );

@@ -118,8 +118,8 @@ export default function AccountSheet({
       <div className="flex flex-col gap-5">
         {progress ? <ProgressCard progress={progress} onChanged={onProgressChanged} /> : <Spinner />}
 
-        <section className="flex items-center gap-3 rounded-none border border-line bg-bg p-3">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-none bg-elev text-ink">
+        <section className="flex items-center gap-3 rounded-2xl border border-line bg-bg p-3">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-elev text-ink">
             <CategoryIcon category="estabelecimento" />
           </span>
           <span className="min-w-0 flex-1">
@@ -144,8 +144,8 @@ export default function AccountSheet({
           ) : (
             <ul className="flex flex-col gap-2">
               {posts.map((p) => (
-                <li key={p.id} className="flex items-center gap-3 rounded-none border border-line bg-bg p-2 pr-3">
-                  <span className="h-12 w-12 shrink-0 overflow-hidden rounded-none bg-elev">
+                <li key={p.id} className="flex items-center gap-3 rounded-2xl border border-line bg-bg p-2 pr-3">
+                  <span className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-elev">
                     {p.photo_path && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -202,7 +202,7 @@ export default function AccountSheet({
           Sair da conta
         </Button>
 
-        <section className="rounded-none border border-line p-3">
+        <section className="rounded-2xl border border-line p-3">
           {!deleting ? (
             <Button variant="perigo" onClick={() => setDeleting(true)} className="w-full">
               Excluir minha conta
@@ -218,7 +218,7 @@ export default function AccountSheet({
                 onChange={(e) => setConfirmText(e.target.value)}
                 autoCapitalize="characters"
                 aria-label="Digite EXCLUIR para confirmar"
-                className="rounded-none border border-line bg-bg px-3 py-2 text-base outline-none focus:border-danger"
+                className="rounded-xl border border-line bg-bg px-3 py-2 text-base outline-none focus:border-danger"
               />
               <div className="flex gap-2">
                 <Button variant="secundario" className="flex-1" onClick={() => setDeleting(false)}>

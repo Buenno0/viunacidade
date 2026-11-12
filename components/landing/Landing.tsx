@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Fragment, type CSSProperties, type ReactNode } from "react";
-import Mark from "@/components/ui/Mark";
-import LiveMap from "@/components/landing/LiveMap";
+import HeroNoite from "@/components/landing/HeroNoite";
+import CeuDoDia, { Horizonte } from "@/components/landing/CeuDoDia";
+import Cabecalho from "@/components/landing/Cabecalho";
+import OlheiroVivo, { VooOlheiro } from "@/components/landing/OlheiroVivo";
+import Olheiro, { NIVEL_COR } from "@/components/landing/Olheiro";
 import PauseButton from "@/components/landing/PauseButton";
 import Reveal from "@/components/landing/Reveal";
 import StoryDemo from "@/components/landing/StoryDemo";
@@ -83,6 +86,7 @@ function jsonLd(lang: Lang) {
 // App instalado aberto num atalho antigo da raiz: vai ao mapa antes de pintar
 const standaloneScript = `if(matchMedia("(display-mode: standalone)").matches||navigator.standalone)location.replace("/mapa")`;
 
+
 function Arrow() {
   return (
     <svg className="lp-seta" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
@@ -110,7 +114,7 @@ function Check({ className = "", style }: { className?: string; style?: CSSPrope
 function SectionHead({ eyebrow, id, children, accent }: { eyebrow: string; id: string; children: ReactNode; accent?: boolean }) {
   return (
     <div className="lp-rv flex max-w-[640px] flex-col gap-2.5">
-      <span className="lp-legenda" style={accent ? { color: "var(--accent)" } : undefined}>{eyebrow}</span>
+      <span className={`lp-pilula ${accent ? "lp-pilula-luz" : ""}`}>{eyebrow}</span>
       <h2 id={id} className="lp-disp lp-h2">{children}</h2>
     </div>
   );
@@ -129,78 +133,89 @@ function Word({ children, delay }: { children: string; delay: number }) {
 export default function Landing({ lang }: { lang: Lang }) {
   const t = DICT[lang];
   return (
+    <>
+    {/* scripts fora do LangProvider (componente de cliente): dentro dele o
+        React reclama de <script> renderizado no cliente */}
+    <script dangerouslySetInnerHTML={{ __html: standaloneScript }} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(lang)) }} />
     <LangProvider lang={lang}>
-    <div className="light lp min-h-screen">
-      <script dangerouslySetInnerHTML={{ __html: standaloneScript }} />
+    <div className="dark lp min-h-screen">
+      <CeuDoDia />
+      <VooOlheiro cor={NIVEL_COR[3]} tam={76} />
       <Reveal />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(lang)) }} />
 
-      <header className="lp-head">
-        {/* No celular tudo cabe em uma linha só: o cabeçalho é grudento, e
-            uma segunda linha comia ~55px de cada tela. "Entrar" some abaixo de
-            sm porque o mapa já leva pro login. */}
-        <div className="lp-wrap flex flex-wrap items-center gap-x-3 gap-y-3 py-3 sm:gap-x-7">
-          <a href="#topo" aria-label={t.head.home} className="lp-disp flex items-center gap-2.5 text-[22px]">
-            <Mark size={32} />
-            Viu
-          </a>
-          <nav aria-label={t.head.nav} className="hidden flex-auto flex-wrap gap-x-5 gap-y-1 text-sm text-muted md:flex">
-            <a href="#como" className="hover:text-ink">{t.head.how}</a>
-            <a href="#comercios" className="hover:text-ink">{t.head.shops}</a>
-            <a href="#faq" className="hover:text-ink">{t.head.faq}</a>
-          </nav>
-          <div className="ml-auto flex items-center gap-2.5">
-            <a href={t.head.switchHref} hrefLang={t.head.switchLang} lang={t.head.switchLang} aria-label={t.head.switchLabel} title={t.head.switchLabel} className="lp-num flex min-h-11 items-center px-2.5 text-sm text-muted hover:text-ink">
-              {t.head.switchShort}
-            </a>
-            <a href="/mapa?entrar" className="hidden min-h-11 items-center px-2.5 text-sm sm:flex">{t.head.signIn}</a>
-            <a href="/mapa" className="lp-btn lp-btn-p" style={{ minHeight: 44 }}>{t.head.openMap}</a>
-          </div>
-        </div>
-      </header>
+      <Cabecalho />
 
       <main>
-        {/* Hero */}
-        <section id="topo" aria-labelledby="h1" className="lp-wrap flex flex-wrap items-center gap-12 pb-16 pt-14">
-          <div className="flex min-w-0 flex-[1_1_420px] flex-col gap-[22px]">
-            <span className="lp-legenda lp-fade flex items-center gap-2.5">
-              <span className="lp-ponto" />
-              {CITY.name}, {CITY.uf}
-            </span>
-            <h1 id="h1" className="lp-disp m-0 text-[clamp(44px,5.4vw,74px)] leading-[0.94]">
-              {t.hero.line1.map((w, i) => (
-                <Fragment key={i}>
-                  {i > 0 && " "}
-                  <Word delay={i ? 0.2 : 0.05}>{w}</Word>
-                </Fragment>
-              ))}
-              <br />
-              {t.hero.line2.map((w, i) => (
-                <Fragment key={i}>
-                  {i > 0 && " "}
-                  <Word delay={0.4 + i * 0.08}>{w}</Word>
-                </Fragment>
-              ))}
-            </h1>
-            <p className="lp-fade lp-muted m-0 max-w-[520px] text-lg" style={{ animationDelay: "0.6s" }}>
-              {t.hero.lead}
-            </p>
-            <div className="lp-fade flex flex-wrap gap-3" style={{ animationDelay: "0.75s" }}>
-              <a href="/mapa" className="lp-btn lp-btn-p" style={{ minHeight: 52, padding: "0 26px", fontSize: 16 }}>
-                {t.hero.cta}
-                <Arrow />
-              </a>
-              <VideoLink className="lp-btn lp-btn-s" style={{ minHeight: 52, padding: "0 22px", fontSize: 16 }}>
-                <PlayIcon />
-                {t.hero.video}
-              </VideoLink>
+        {/* Hero: a cidade à noite, com as peças do app flutuando no céu */}
+        <section id="topo" aria-labelledby="h1" className="lp-ceu" data-hora="21">
+          <div className="lp-wrap relative z-[1] flex flex-wrap items-center gap-12 pb-28 pt-[124px]">
+            <div className="flex min-w-0 flex-[1_1_420px] flex-col gap-6">
+              <span className="lp-pilula lp-fade self-start">
+                <span className="lp-ponto" style={{ background: "var(--luz)" }} />
+                {CITY.name}, {CITY.uf} · beta
+              </span>
+              <h1 id="h1" className="lp-disp lp-h1 m-0">
+                {t.hero.line1.map((w, i) => (
+                  <Fragment key={i}>
+                    {i > 0 && " "}
+                    <Word delay={i ? 0.2 : 0.05}>{w}</Word>
+                  </Fragment>
+                ))}
+                <br />
+                {t.hero.line2.map((w, i) => (
+                  <Fragment key={i}>
+                    {i > 0 && " "}
+                    <Word delay={0.4 + i * 0.08}>{w}</Word>
+                  </Fragment>
+                ))}
+              </h1>
+              <p className="lp-fade lp-muted m-0 max-w-[520px] text-lg" style={{ animationDelay: "0.6s" }}>
+                {t.hero.lead}
+              </p>
+              <div className="lp-fade flex flex-wrap gap-3" style={{ animationDelay: "0.75s" }}>
+                <a href="/mapa" className="lp-btn lp-btn-p" style={{ minHeight: 52, padding: "0 26px", fontSize: 16 }}>
+                  {t.hero.cta}
+                  <Arrow />
+                </a>
+                <VideoLink className="lp-btn lp-btn-s" style={{ minHeight: 52, padding: "0 22px", fontSize: 16 }}>
+                  <PlayIcon />
+                  {t.hero.video}
+                </VideoLink>
+              </div>
             </div>
-            <span className="lp-fade lp-muted text-[13px]" style={{ animationDelay: "0.9s" }}>
-              {t.hero.note}
-            </span>
+            <div className="min-w-0 flex-[1_1_480px]">
+              <HeroNoite />
+            </div>
           </div>
-          <div className="min-w-0 flex-[1_1_440px]">
-            <LiveMap />
+          <Horizonte />
+          <div className="lp-ceu-telhado">
+            <OlheiroVivo cor={NIVEL_COR[0]} tam={58} falas={t.olheiros.falas} />
+            <span className="lp-ninho" data-ninho aria-hidden="true">
+              <Olheiro cor={NIVEL_COR[3]} tam={76} />
+            </span>
+            <OlheiroVivo cor={NIVEL_COR[2]} tam={62} falas={t.olheiros.falas} sozinho={false} />
+          </div>
+        </section>
+
+        {/* Problema */}
+        <section aria-labelledby="h-prob" data-hora="5.5">
+          <div className="lp-wrap lp-sec flex flex-col gap-9">
+            <SectionHead eyebrow={t.problem.eyebrow} id="h-prob">{t.problem.title}</SectionHead>
+            <div className="lp-grid lp-rvg">
+              {t.problem.cards.map(([h, p], i) => (
+                <div key={h} className="light lp-card lp-tilt">
+                  {i === 0 && (
+                    <span className="lp-pouso" data-pouso>
+                      <OlheiroVivo cor={NIVEL_COR[3]} tam={50} falas={t.olheiros.problema} />
+                    </span>
+                  )}
+                  <span className="lp-num text-[28px] font-medium" style={{ color: "var(--danger)" }}>0{i + 1}</span>
+                  <h3 className="lp-disp mb-1.5 mt-2.5 text-[21px]">{h}</h3>
+                  <p className="lp-muted m-0">{p}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -221,24 +236,8 @@ export default function Landing({ lang }: { lang: Lang }) {
           </div>
         </div>
 
-        {/* Problema */}
-        <section aria-labelledby="h-prob" style={{ background: "var(--surface)" }}>
-          <div className="lp-wrap lp-sec flex flex-col gap-9">
-            <SectionHead eyebrow={t.problem.eyebrow} id="h-prob">{t.problem.title}</SectionHead>
-            <div className="lp-grid lp-rvg">
-              {t.problem.cards.map(([h, p], i) => (
-                <div key={h} className="lp-card lp-card-bg">
-                  <span className="lp-num text-[28px] font-medium" style={{ color: "var(--danger)" }}>0{i + 1}</span>
-                  <h3 className="lp-disp mb-1.5 mt-2.5 text-[21px]">{h}</h3>
-                  <p className="lp-muted m-0">{p}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* Vídeo de 1 minuto: começa no "ouvi dizer", responde o problema antes do detalhe */}
-        <section id="video" aria-labelledby="h-video" className="lp-wrap lp-sec flex flex-col gap-9">
+        <section id="video" aria-labelledby="h-video" data-hora="8" className="lp-wrap lp-sec flex flex-col gap-9">
           <SectionHead eyebrow={t.video.eyebrow} id="h-video">{t.video.title}</SectionHead>
           <div className="lp-rv">
             <ExplainerVideo />
@@ -246,10 +245,10 @@ export default function Landing({ lang }: { lang: Lang }) {
         </section>
 
         {/* Como funciona */}
-        <section id="como" aria-labelledby="h-como" className="lp-wrap lp-sec flex flex-col gap-9">
+        <section id="como" aria-labelledby="h-como" data-hora="9" className="lp-wrap lp-sec flex flex-col gap-9">
           <SectionHead eyebrow={t.how.eyebrow} id="h-como">{t.how.title}</SectionHead>
           <ol className="lp-grid lp-rvg m-0 list-none p-0">
-            <li className="lp-card flex flex-col gap-3">
+            <li className="light lp-card lp-tilt flex flex-col gap-3">
               <div className="flex items-center justify-between"><span className="lp-num text-sm" style={{ color: "var(--accent)" }}>01</span><span className="lp-legenda">{t.how.steps[0].tag}</span></div>
               <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
                 <g className="lp-obt"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></g>
@@ -258,7 +257,8 @@ export default function Landing({ lang }: { lang: Lang }) {
               <h3 className="lp-disp m-0 text-[22px]">{t.how.steps[0].h}</h3>
               <p className="lp-muted m-0">{t.how.steps[0].p}</p>
             </li>
-            <li className="lp-card flex flex-col gap-3">
+            <li className="light lp-card lp-tilt relative flex flex-col gap-3">
+              <OlheiroVivo cor={NIVEL_COR[1]} tam={38} falas={t.olheiros.como} className="lp-poleiro" />
               <div className="flex items-center justify-between"><span className="lp-num text-sm" style={{ color: "var(--accent)" }}>02</span><span className="lp-legenda">{t.how.steps[1].tag}</span></div>
               <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="12" cy="12" r="9" />
@@ -267,7 +267,7 @@ export default function Landing({ lang }: { lang: Lang }) {
               <h3 className="lp-disp m-0 text-[22px]">{t.how.steps[1].h}</h3>
               <p className="lp-muted m-0">{t.how.steps[1].p}</p>
             </li>
-            <li className="lp-card flex flex-col gap-3">
+            <li className="light lp-card lp-tilt flex flex-col gap-3">
               <div className="flex items-center justify-between"><span className="lp-num text-sm" style={{ color: "var(--accent)" }}>03</span><span className="lp-legenda">{t.how.steps[2].tag}</span></div>
               <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
                 <circle className="lp-relogio" cx="12" cy="12" r="9" transform="rotate(-90 12 12)" />
@@ -280,17 +280,17 @@ export default function Landing({ lang }: { lang: Lang }) {
         </section>
 
         {/* Um dia na cidade */}
-        <section aria-labelledby="h-dia" style={{ borderTop: "1px solid var(--line)" }}>
+        <section aria-labelledby="h-dia" data-hora="10">
           <div className="lp-wrap lp-sec flex flex-col gap-9">
             <SectionHead eyebrow={t.dayHead.eyebrow} id="h-dia">{t.dayHead.title}</SectionHead>
-            <div className="lp-rv">
+            <div className="light lp-painel lp-rv">
               <DaySection />
             </div>
           </div>
         </section>
 
         {/* Story */}
-        <section aria-labelledby="h-story" className="lp-alt">
+        <section aria-labelledby="h-story" data-hora="12" className="lp-alt">
           <div className="lp-wrap lp-sec flex flex-wrap items-center gap-12">
             <div className="lp-rv flex min-w-0 flex-[1_1_380px] flex-col gap-5">
               <span className="lp-legenda">{t.story.eyebrow}</span>
@@ -314,7 +314,7 @@ export default function Landing({ lang }: { lang: Lang }) {
         </section>
 
         {/* Alertas */}
-        <section aria-labelledby="h-alerta" className="lp-wrap lp-sec flex flex-wrap items-center gap-12">
+        <section aria-labelledby="h-alerta" data-hora="13" className="lp-wrap lp-sec flex flex-wrap items-center gap-12">
           <div className="lp-rv flex min-w-0 flex-[1_1_380px] flex-col gap-5">
             <span className="lp-legenda">{t.alerts.eyebrow}</span>
             <h2 id="h-alerta" className="lp-disp lp-h2">{t.alerts.title}</h2>
@@ -336,12 +336,12 @@ export default function Landing({ lang }: { lang: Lang }) {
         </section>
 
         {/* Recursos */}
-        <section aria-labelledby="h-rec" style={{ borderTop: "1px solid var(--line)" }}>
+        <section aria-labelledby="h-rec" data-hora="14">
           <div className="lp-wrap lp-sec flex flex-col gap-9">
             <SectionHead eyebrow={t.features.eyebrow} id="h-rec">{t.features.title}</SectionHead>
             <div className="lp-grid lp-rvg">
               {t.features.items.map(([h, p], i) => (
-                <div key={h} className={`lp-card ${i === 0 ? "lp-viva" : ""}`}>
+                <div key={h} className={`light lp-card lp-tilt ${i === 0 ? "lp-viva" : ""}`}>
                   <h3 className="lp-disp mb-2 mt-0 text-xl" style={{ color: "var(--accent)" }}>{h}</h3>
                   <p className="lp-muted m-0">{p}</p>
                 </div>
@@ -351,8 +351,8 @@ export default function Landing({ lang }: { lang: Lang }) {
         </section>
 
         {/* Rostos e placas */}
-        <section aria-labelledby="h-borra" className="lp-wrap lp-sec flex flex-wrap items-center gap-12">
-          <div className="lp-rv min-w-0 flex-[1_1_480px] overflow-hidden rounded-none border border-line" style={{ aspectRatio: "11 / 9" }}>
+        <section aria-labelledby="h-borra" data-hora="15" className="lp-wrap lp-sec flex flex-wrap items-center gap-12">
+          <div className="lp-rv min-w-0 flex-[1_1_480px] overflow-hidden rounded-[22px] border border-line" style={{ aspectRatio: "11 / 9" }}>
             <LazyScene kind="blur" className="h-full w-full" title={t.blur.scene} />
           </div>
           <div className="lp-rv flex min-w-0 flex-[1_1_360px] flex-col gap-5">
@@ -375,9 +375,9 @@ export default function Landing({ lang }: { lang: Lang }) {
         </section>
 
         {/* Confiança e gamificação */}
-        <section aria-label={t.trust.label} className="lp-alt">
+        <section aria-label={t.trust.label} data-hora="16" className="lp-alt">
           <div className="lp-wrap lp-sec lp-rvg flex flex-wrap gap-6">
-            <div className="lp-card lp-card-bg flex min-w-0 flex-[1_1_420px] flex-col gap-4">
+            <div className="light lp-card flex min-w-0 flex-[1_1_420px] flex-col gap-4">
               <span className="lp-legenda">{t.trust.eyebrow}</span>
               <h2 className="lp-disp m-0 text-[32px] leading-[1.1]">{t.trust.title}</h2>
               <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
@@ -389,7 +389,7 @@ export default function Landing({ lang }: { lang: Lang }) {
                 ))}
               </ul>
             </div>
-            <div className="lp-card lp-card-bg flex min-w-0 flex-[1_1_420px] flex-col gap-4">
+            <div className="light lp-card flex min-w-0 flex-[1_1_420px] flex-col gap-4">
               <span className="lp-legenda">{t.game.eyebrow}</span>
               <h2 className="lp-disp m-0 text-[32px] leading-[1.1]">{t.game.title(t.levels[0], t.levels[5])}</h2>
               <p className="lp-muted m-0">{t.game.lead}</p>
@@ -409,20 +409,20 @@ export default function Landing({ lang }: { lang: Lang }) {
         </section>
 
         {/* Primeiro do bairro */}
-        <section id="bairro" aria-labelledby="h-bairro" className="lp-wrap lp-sec flex flex-col gap-9">
+        <section id="bairro" aria-labelledby="h-bairro" data-hora="17" className="lp-wrap lp-sec flex flex-col gap-9">
           <SectionHead eyebrow={t.hood.eyebrow} id="h-bairro" accent>
             {t.hood.title}
           </SectionHead>
           <p className="lp-muted lp-rv m-0 -mt-4 max-w-[640px] text-[17px]">
             {t.hood.lead}
           </p>
-          <div className="lp-rv">
+          <div className="light lp-painel lp-rv">
             <FirstInNeighborhood />
           </div>
         </section>
 
         {/* Comércios */}
-        <section id="comercios" aria-labelledby="h-com" className="lp-wrap lp-sec flex flex-wrap items-start gap-12">
+        <section id="comercios" aria-labelledby="h-com" data-hora="17.75" className="lp-wrap lp-sec flex flex-wrap items-start gap-12">
           <div className="lp-rv flex min-w-0 flex-[1_1_420px] flex-col gap-[18px]">
             <span className="lp-legenda">{t.shops.eyebrow}</span>
             <h2 id="h-com" className="lp-disp lp-h2">{t.shops.title}</h2>
@@ -433,7 +433,8 @@ export default function Landing({ lang }: { lang: Lang }) {
               {t.shops.free}
             </span>
           </div>
-          <div className="lp-card lp-rv flex min-w-0 flex-[1_1_420px] flex-col gap-4">
+          <div className="light lp-card lp-rv relative flex min-w-0 flex-[1_1_420px] flex-col gap-4">
+            <OlheiroVivo cor={NIVEL_COR[0]} tam={40} falas={t.olheiros.comercio} className="lp-poleiro" />
             <span className="lp-legenda">{t.shops.simulate}</span>
             <AdSimulator />
             <ol className="lp-muted m-0 flex list-none flex-col gap-2 p-0 text-[15px]">
@@ -449,7 +450,7 @@ export default function Landing({ lang }: { lang: Lang }) {
         </section>
 
         {/* Outras cidades */}
-        <section aria-labelledby="h-cid" className="lp-alt">
+        <section aria-labelledby="h-cid" data-hora="18.25" className="lp-alt">
           <div className="lp-wrap lp-rv flex flex-wrap items-center justify-between gap-5 py-14">
             <div className="flex flex-[1_1_360px] flex-col gap-1.5">
               <h2 id="h-cid" className="lp-disp m-0 text-[28px]">{t.cities.title}</h2>
@@ -463,9 +464,11 @@ export default function Landing({ lang }: { lang: Lang }) {
         </section>
 
         {/* Perguntas */}
-        <section id="faq" aria-labelledby="h-faq" className="lp-sec mx-auto flex max-w-[820px] flex-col gap-6 px-5">
+        <section id="faq" aria-labelledby="h-faq" data-hora="19" className="lp-sec mx-auto flex max-w-[820px] flex-col gap-6 px-5">
           <h2 id="h-faq" className="lp-disp lp-h2 lp-rv">{t.faqTitle}</h2>
-          <div className="lp-faq lp-rvg flex flex-col border-t border-line">
+          <div className="light lp-painel lp-faq relative">
+            <OlheiroVivo cor={NIVEL_COR[4]} tam={40} falas={t.olheiros.faq} className="lp-poleiro" />
+            <div className="lp-rvg flex flex-col">
             {t.faq.map((f) => (
               <details key={f.q} className="border-b border-line">
                 <summary>
@@ -475,25 +478,34 @@ export default function Landing({ lang }: { lang: Lang }) {
                 <p className="lp-muted mb-5 mt-0">{f.a}</p>
               </details>
             ))}
+            </div>
           </div>
         </section>
 
-        {/* CTA final */}
-        <section aria-labelledby="h-cta" className="relative overflow-hidden" style={{ borderTop: "1px solid var(--line)" }}>
-          <div className="lp-wrap lp-rv relative flex flex-col items-center gap-[26px] pb-10 pt-24 text-center">
-            <h2 id="h-cta" className="lp-disp m-0 max-w-[820px] text-[clamp(36px,5.5vw,64px)] leading-[1.04]">
-              {t.end.title} <span style={{ color: "var(--accent)" }}>{t.end.gold}</span>
+        {/* CTA final: a noite volta, com todos os níveis de Olheiro */}
+        <section aria-labelledby="h-cta" className="lp-ceu lp-fim" data-hora="21">
+          <div className="lp-wrap lp-rv relative z-[1] flex flex-col items-center gap-[26px] pb-44 pt-28 text-center">
+            <h2 id="h-cta" className="lp-disp lp-h1 m-0 max-w-[880px]">
+              {t.end.title} <span style={{ color: "var(--luz)" }}>{t.end.gold}</span>
             </h2>
             <a href="/mapa" className="lp-btn lp-btn-p" style={{ minHeight: 56, padding: "0 32px", fontSize: 17 }}>
               {t.end.cta}
               <Arrow />
             </a>
-            <LazyScene kind="city" className="mt-4 w-full max-w-[760px]" style={{ aspectRatio: "560 / 440" }} />
+            <ul className="m-0 mt-8 flex list-none flex-wrap items-end justify-center gap-x-6 gap-y-5 p-0" aria-label={t.game.eyebrow}>
+              {t.levels.map((nome, i) => (
+                <li key={nome} className="flex flex-col items-center gap-2">
+                  <OlheiroVivo cor={NIVEL_COR[i]} tam={44 + i * 8} falas={[nome]} sozinho={false} lado={i < 3 ? "dir" : "esq"} />
+                  <span className="text-xs font-semibold">{nome}</span>
+                </li>
+              ))}
+            </ul>
           </div>
+          <Horizonte />
         </section>
       </main>
 
-      <footer style={{ borderTop: "1px solid var(--line)" }}>
+      <footer className="dark" style={{ background: "var(--bg)", borderTop: "1px solid var(--line)" }}>
         <div className="lp-wrap lp-muted flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-6 text-[13px]">
           <span className="lp-disp text-base text-ink">Viu na Cidade · {CITY.name}/{CITY.uf}</span>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
@@ -505,5 +517,6 @@ export default function Landing({ lang }: { lang: Lang }) {
       </footer>
     </div>
     </LangProvider>
+    </>
   );
 }

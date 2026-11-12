@@ -61,7 +61,7 @@ export default function AchievementShowcase() {
   return (
     <div
       ref={box}
-      className="sala-escura flex touch-pan-y select-none flex-col items-center py-4 text-center"
+      className="sala-escura flex touch-pan-y select-none flex-col items-center rounded-[20px] bg-[#0d1640] px-4 py-5 text-center"
       aria-live="off"
       // arrastar para os lados também passa
       onPointerDown={(e) => (swipe.current = e.clientX)}

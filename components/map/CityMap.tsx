@@ -19,6 +19,7 @@ import { isFresh, remaining, trendingRanks, type PostFeature, type PostPropertie
 import { tagHtml, type TagKind } from "@/components/ui/Tag";
 import { KIND_LABEL, LANDMARK_MIN_ZOOM, landmarkSvg, type Landmark } from "@/lib/landmarks";
 import type { Theme } from "@/lib/theme";
+import { PINO_PATH } from "@/design/marca.mjs";
 
 setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
 
@@ -93,7 +94,7 @@ function heatLayer(id: string, source: string, visible: boolean, weight: unknown
 function ourLayers(theme: Theme, type: MapType, heat: HeatState): LayerSpecification[] {
   const tone = mapTone(theme, type);
   const mask =
-    type === "satelite" ? { c: "#000000", o: 0.5 } : tone === "dark" ? { c: "#0b0c0f", o: 0.62 } : { c: "#f3f0e9", o: 0.66 };
+    type === "satelite" ? { c: "#000000", o: 0.5 } : tone === "dark" ? { c: "#050a1f", o: 0.62 } : { c: "#eef2fb", o: 0.66 };
   return [
     heatLayer("heat-history", "heat-history", Boolean(heat.history), ["interpolate", ["linear"], ["get", "n"], 3, 0.5, 20, 1]),
     heatLayer("heat-now", "posts-now", heat.now, 1),
@@ -107,7 +108,7 @@ function ourLayers(theme: Theme, type: MapType, heat: HeatState): LayerSpecifica
       id: "city-boundary",
       type: "line",
       source: "city-boundary",
-      paint: { "line-color": tone === "dark" ? "#e0a84e" : "#9d5a26", "line-width": 2, "line-dasharray": [3, 2], "line-opacity": 0.8 },
+      paint: { "line-color": tone === "dark" ? "#ffd27a" : "#2f56b8", "line-width": 2, "line-dasharray": [3, 2], "line-opacity": 0.8 },
     },
     // Invisível: só existe para o MapLibre carregar e agrupar o source dos posts
     { id: "posts-hit", type: "circle", source: "posts", paint: { "circle-radius": 0, "circle-opacity": 0 } },
@@ -158,7 +159,7 @@ function setPinPhoto(img: HTMLImageElement, post: PostProperties) {
     return;
   }
   // A foto troca só quando já carregou: até lá, o pin segue com o anel girando
-  const pin = img.closest(".pin") as HTMLElement | null;
+  const pin = img.closest(".pino") as HTMLElement | null;
   const show = (url: string) => {
     if (img.dataset.path !== want) return;
     img.src = url;
@@ -181,11 +182,21 @@ function setPinPhoto(img: HTMLImageElement, post: PostProperties) {
   pre.src = thumbUrl(want);
 }
 
+// O pin é o pino-olho da marca: a foto no olho, o anel do tempo em volta da
+// foto (cheio quando o post nasce, vazio quando ele some) e o corpo na cor da
+// severidade. No agrupamento, um segundo pino "por baixo" e a contagem.
 function pinElement(post: PostProperties, count?: number) {
   const el = document.createElement("button");
   el.type = "button";
-  el.className = `pin sala-escura${count ? " pin-cluster" : ""}`;
+  el.className = `pino sala-escura${count ? " pino-cluster" : ""}`;
   el.setAttribute("aria-label", count ? `${count} posts aqui` : "Ver post");
+  el.innerHTML =
+    `<svg class="pino-forma" viewBox="0 0 100 120" aria-hidden="true">` +
+    (count ? `<path class="pino-pilha" d="${PINO_PATH}" transform="translate(13 -7)"/>` : "") +
+    `<path class="pino-corpo" d="${PINO_PATH}"/>` +
+    `<circle class="pino-trilho" cx="50" cy="46" r="31"/>` +
+    `<circle class="pino-anel" cx="50" cy="46" r="31" pathLength="100" transform="rotate(-90 50 46)"/>` +
+    `</svg>`;
   const img = document.createElement("img");
   img.alt = "";
   img.decoding = "async";
@@ -211,7 +222,9 @@ function paintPin(
   const promo = post.category === "estabelecimento";
   const quiet = opts.archive || post.processing;
   el.style.setProperty("--sev", quiet || opts.seen ? "var(--muted)" : promo ? "var(--ink)" : severityVar(post.category));
-  el.style.setProperty("--restante", opts.archive ? "1" : post.processing ? "0.25" : remaining(post).toFixed(3));
+  const restante = opts.archive ? 1 : post.processing ? 0.25 : remaining(post);
+  el.style.setProperty("--restante", restante.toFixed(3));
+  el.querySelector(".pino-anel")?.setAttribute("stroke-dasharray", `${Math.max(0.5, restante * 100).toFixed(1)} 100`);
   const tag: TagKind | null =
     opts.archive || opts.cluster || post.processing ? null : promo ? "divulgacao" : opts.rank ? "alta" : isFresh(post.created_at) ? "agora" : null;
   el.dataset.novo = tag === "agora" && !opts.seen ? "sim" : "nao";
@@ -307,7 +320,7 @@ export default function CityMap({
             }
           });
           entry = {
-            marker: new Marker({ element: el, anchor: "bottom", offset: [0, -5] }).setLngLat(coords).addTo(m),
+            marker: new Marker({ element: el, anchor: "bottom", offset: [0, 3] }).setLngLat(coords).addTo(m),
             postId: post.id,
           };
           markerMap.set(key, entry);

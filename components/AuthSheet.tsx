@@ -29,7 +29,7 @@ export const PENDING_TERMS_KEY = "deolho-termos-aceitos";
 export const PENDING_THEN_KEY = "deolho-depois-do-login";
 
 const FIELD =
-  "w-full rounded-none border border-line bg-bg px-3 py-2.5 text-base outline-none transition focus:border-accent";
+  "w-full rounded-xl border border-line bg-bg px-3 py-2.5 text-base outline-none transition focus:border-accent";
 
 // Login com Google (ou código de 6 dígitos no e-mail) + aceite dos termos.
 // Se já existe sessão (ex.: fechou antes de aceitar), mostra só os termos.

@@ -17,7 +17,7 @@ export default function Privacidade() {
           <h1 className="font-display text-2xl font-bold">Política de privacidade</h1>
         </div>
       </div>
-      <div className="mt-6 space-y-5 rounded-none border border-line bg-surface p-5 text-sm leading-relaxed">
+      <div className="mt-6 space-y-5 rounded-2xl border border-line bg-surface p-5 text-sm leading-relaxed">
         <p>
           O Viu na Cidade é um mapa de fotos do que está acontecendo agora em Itapetininga/SP. Esta política explica quais
           dados coletamos, para que usamos e como você pode apagá-los, de acordo com a Lei Geral de Proteção de Dados (LGPD,

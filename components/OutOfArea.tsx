@@ -26,7 +26,7 @@ export default function OutOfArea({ nearest, from, onGo, onClose }: Props) {
   }
 
   return (
-    <div className="pointer-events-auto relative mx-auto w-full max-w-lg rounded-none border border-line bg-surface p-5">
+    <div className="pointer-events-auto relative mx-auto w-full max-w-lg rounded-2xl border border-line bg-surface p-5">
       <button
         aria-label="Fechar"
         onClick={onClose}

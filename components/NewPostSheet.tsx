@@ -11,7 +11,7 @@ import {
 } from "@/lib/categories";
 import { iosOtherBrowser, safariUrl, useLocation } from "@/lib/useLocation";
 import Sheet from "./Sheet";
-import { Button, Chip, Spinner } from "./ui";
+import { Button, Chip, Spinner, cx } from "./ui";
 import { AlertIcon, CameraIcon, CategoryIcon, PinIcon } from "./ui/icons";
 import { errorMessage } from "@/lib/errors";
 import { useDragScroll } from "@/lib/useDragScroll";
@@ -52,6 +52,8 @@ type Props = {
   business?: { name: string } | null;
   // Foto já tirada pelo botão Registrar (câmera primeiro)
   initialPhoto?: File | null;
+  // Com aviso do tempo valendo, a categoria que ele sugere vem primeiro (V4)
+  sugerida?: Category | null;
 };
 
 export default function NewPostSheet({
@@ -61,6 +63,7 @@ export default function NewPostSheet({
   onPosted,
   business,
   initialPhoto = null,
+  sugerida = null,
 }: Props) {
   const faixa = useDragScroll();
   const [photo, setPhoto] = useState<File | null>(initialPhoto);
@@ -306,7 +309,7 @@ export default function NewPostSheet({
             <img
               src={preview}
               alt="Prévia da foto"
-              className="h-24 w-24 shrink-0 rounded-none border border-line object-cover"
+              className="h-24 w-24 shrink-0 rounded-xl border border-line object-cover"
             />
             <div className="flex min-w-0 flex-1 flex-col gap-2 text-sm">
               {locationLine && (
@@ -336,7 +339,7 @@ export default function NewPostSheet({
             </div>
           </div>
         ) : (
-          <label className="flex aspect-[16/9] cursor-pointer flex-col items-center justify-center gap-1.5 rounded-none border border-dashed border-line bg-elev text-muted transition hover:text-ink">
+          <label className="flex aspect-[16/9] cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border border-dashed border-line bg-elev text-muted transition hover:text-ink">
             <CameraIcon width="2em" height="2em" />
             <span className="font-display text-base font-semibold text-ink">
               Tirar foto
@@ -348,7 +351,10 @@ export default function NewPostSheet({
 
         {/* Categorias numa linha, deslizando, as mais usadas primeiro */}
         <fieldset>
-          <legend className="etiqueta mb-2">O que é</legend>
+          <legend className="etiqueta mb-2 flex w-full items-center justify-between gap-2">
+            O que é
+            {sugerida && !category && <span className="text-xs font-semibold text-warn">com aviso de chuva, {CATEGORIES[sugerida].label} vem primeiro</span>}
+          </legend>
           <div ref={faixa} className="no-scrollbar -mx-5 flex select-none gap-2 overflow-x-auto px-5 pb-1">
             {business && !request && (
               <Chip
@@ -361,13 +367,17 @@ export default function NewPostSheet({
                 Divulgação · {business.name}
               </Chip>
             )}
-            {ORDER.map((key) => (
+            {(sugerida ? [sugerida, ...ORDER.filter((k) => k !== sugerida)] : ORDER).map((key) => (
               <Chip
                 key={key}
                 type="button"
                 active={category === key}
                 onClick={() => setCategory(key)}
-                className="shrink-0 py-2 text-sm"
+                className={cx(
+                  "shrink-0 py-2 text-sm",
+                  // sugerida e ainda não escolhida: contorno tracejado da luz
+                  key === sugerida && category !== key && "border-2 border-dashed border-[#e0a225] text-ink",
+                )}
               >
                 <CategoryIcon category={key} />
                 {CATEGORIES[key].label}
@@ -389,7 +399,7 @@ export default function NewPostSheet({
             placeholder="Conte rapidinho o que está rolando"
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
-            className="max-h-32 min-h-11 w-full resize-none rounded-none border border-line bg-bg px-3 py-2.5 text-base outline-none transition [field-sizing:content] focus:border-accent"
+            className="max-h-32 min-h-11 w-full resize-none rounded-xl border border-line bg-bg px-3 py-2.5 text-base outline-none transition [field-sizing:content] focus:border-accent"
           />
         </label>
 

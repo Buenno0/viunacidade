@@ -23,7 +23,7 @@ export default function AlertStrip({ alerts }: { alerts: CityAlert[] }) {
               <button
                 type="button"
                 onClick={() => setAberto(a)}
-                className="sala-escura flex w-full items-center gap-2.5 rounded-none border bg-surface/90 py-2 pl-3 pr-3 text-left backdrop-blur"
+                className="sala-escura flex w-full items-center gap-2.5 rounded-2xl border bg-surface/90 py-2 pl-3 pr-3 text-left backdrop-blur"
                 style={{ borderColor: severityVar(a.severity) }}
               >
                 <span
@@ -48,46 +48,51 @@ export default function AlertStrip({ alerts }: { alerts: CityAlert[] }) {
         })}
       </ul>
 
-      {aberto && (
-        <Sheet
-          eyebrow={`${SEVERITY[aberto.severity].label} · ${aberto.source === "inmet" ? "INMET" : aberto.source}`}
-          title={aberto.kind}
-          onClose={() => setAberto(null)}
-        >
-          <p className="text-sm text-muted">{janela(aberto)}</p>
-
-          {aberto.risks.length > 0 && (
-            <section className="mt-4">
-              <h3 className="etiqueta mb-1.5">o que pode acontecer</h3>
-              <ul className="flex flex-col gap-1.5">
-                {aberto.risks.map((r, i) => (
-                  <li key={i} className="text-sm leading-relaxed">
-                    {r}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {aberto.instructions.length > 0 && (
-            <section className="mt-4">
-              <h3 className="etiqueta mb-1.5">o que fazer</h3>
-              <ul className="flex flex-col gap-1.5">
-                {aberto.instructions.map((r, i) => (
-                  <li key={i} className="text-sm leading-relaxed">
-                    {r}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          <p className="mt-4 text-xs text-muted">
-            Aviso oficial do Instituto Nacional de Meteorologia para a cidade inteira. O mapa mostra o que as pessoas
-            estão vendo na rua agora.
-          </p>
-        </Sheet>
-      )}
+      {aberto && <AlertSheet alert={aberto} onClose={() => setAberto(null)} />}
     </>
+  );
+}
+
+// O detalhe do aviso do INMET. Abre pela faixa e pela pílula do céu do mapa.
+export function AlertSheet({ alert, onClose }: { alert: CityAlert; onClose: () => void }) {
+  return (
+    <Sheet
+      eyebrow={`${SEVERITY[alert.severity].label} · ${alert.source === "inmet" ? "INMET" : alert.source}`}
+      title={alert.kind}
+      onClose={onClose}
+    >
+      <p className="text-sm text-muted">{janela(alert)}</p>
+
+      {alert.risks.length > 0 && (
+        <section className="mt-4">
+          <h3 className="etiqueta mb-1.5">o que pode acontecer</h3>
+          <ul className="flex flex-col gap-1.5">
+            {alert.risks.map((r, i) => (
+              <li key={i} className="text-sm leading-relaxed">
+                {r}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {alert.instructions.length > 0 && (
+        <section className="mt-4">
+          <h3 className="etiqueta mb-1.5">o que fazer</h3>
+          <ul className="flex flex-col gap-1.5">
+            {alert.instructions.map((r, i) => (
+              <li key={i} className="text-sm leading-relaxed">
+                {r}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <p className="mt-4 text-xs text-muted">
+        Aviso oficial do Instituto Nacional de Meteorologia para a cidade inteira. O mapa mostra o que as pessoas
+        estão vendo na rua agora.
+      </p>
+    </Sheet>
   );
 }
