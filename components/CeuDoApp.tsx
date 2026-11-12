@@ -9,7 +9,7 @@ import { levelName, levelProgress, type Progress } from "@/lib/progress";
 import Olheiro from "./landing/Olheiro";
 import Mark from "./ui/Mark";
 import { cx } from "./ui";
-import { BellIcon, CategoryIcon } from "./ui/icons";
+import { AlertIcon, BellIcon, CategoryIcon, StormIcon } from "./ui/icons";
 
 // O topo do mapa (direção A, pílula "P2 · Borda de luz e véu", canvas "Viu:
 // o app na Noite"). Uma pílula escura centralizada, com o contorno da janela
@@ -28,13 +28,13 @@ import { BellIcon, CategoryIcon } from "./ui/icons";
 // arrastável, e nenhum ancestral leva pointer-events-none (no iPhone, rolagem
 // horizontal dentro de um elemento assim não rola). O véu é irmão, não pai.
 
-// Quando o aviso começa, curto para caber na pílula: "23:00" se for hoje,
+// Quando o aviso começa ou acaba, curto para caber na pílula: "23:59" se for hoje,
 // "sex 0h" se for outro dia (o janela() completo vai no rótulo de leitura)
 const TZ = "America/Sao_Paulo";
 const diaCidade = new Intl.DateTimeFormat("en-CA", { timeZone: TZ });
 const horaCurta = new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: TZ });
 const semana = new Intl.DateTimeFormat("pt-BR", { weekday: "short", timeZone: TZ });
-function comeco(iso: string, agora: number) {
+function quando(iso: string, agora: number) {
   const d = new Date(iso);
   const hoje = diaCidade.format(d) === diaCidade.format(new Date(agora));
   // hora cheia vira "0h", "23h"; o resto fica "14:30"
@@ -101,6 +101,18 @@ export default function CeuDoApp({ rotulo, ultimos, carregando = false, onAbrirP
   const post = !dia && !aviso?.live && ultimos.length ? ultimos[vez % ultimos.length].properties : null;
   const corAviso = aviso ? severityVar(aviso.severity) : "var(--luz)";
 
+  // o aviso do INMET tem cara de aviso: o ícone na cor da severidade, igual
+  // ao círculo da categoria de um post
+  const IconeAviso = ehTempestade(aviso) || /tempest|chuv/i.test(aviso?.kind ?? "") ? StormIcon : AlertIcon;
+  const iconeAviso = (
+    <span
+      className="grid h-9 w-9 shrink-0 place-items-center rounded-full border-[1.5px]"
+      style={{ borderColor: corAviso, color: corAviso, background: `color-mix(in oklab, ${corAviso} 18%, transparent)` }}
+    >
+      <IconeAviso width="18" height="18" />
+    </span>
+  );
+
   // as duas linhas do pulso, conforme o momento
   let icone: ReactNode = null;
   let titulo: ReactNode;
@@ -112,11 +124,12 @@ export default function CeuDoApp({ rotulo, ultimos, carregando = false, onAbrirP
     titulo = <span className="text-luz">{dia}</span>;
     linha = rotulo;
   } else if (aviso?.live) {
-    titulo = <span style={{ color: corAviso }}>{aviso.kind}</span>;
-    linha = `${SEVERITY[aviso.severity].label} · ${rotulo}`;
+    icone = iconeAviso;
+    titulo = aviso.kind;
+    linha = agora !== null ? `alerta até ${quando(aviso.ends_at, agora)}` : "alerta do INMET";
     corLinha = corAviso;
     toque = onAviso;
-    rotuloToque = `${aviso.kind}, ${SEVERITY[aviso.severity].label}. Ver o aviso do INMET`;
+    rotuloToque = `Alerta do INMET: ${aviso.kind}, ${SEVERITY[aviso.severity].label}, ${janela(aviso)}. Ver o aviso`;
   } else if (post) {
     const cor = post.category === "estabelecimento" ? "var(--ink)" : corDaCategoria(post.category);
     const nome = post.category === "estabelecimento" ? (post.business_name ?? CATEGORIES[post.category].label) : CATEGORIES[post.category].label;
@@ -134,11 +147,12 @@ export default function CeuDoApp({ rotulo, ultimos, carregando = false, onAbrirP
     rotuloToque = `${nome}, ${agora !== null ? timeAgo(post.created_at, agora) : ""}. Ver o post. ${rotulo}`;
   } else if (aviso && !carregando) {
     // o aviso que ainda vai começar: avisa antes, quando o mapa está quieto
-    titulo = <span style={{ color: corAviso }}>{aviso.kind}</span>;
-    linha = agora !== null ? `a caminho · ${comeco(aviso.starts_at, agora)}` : "a caminho";
+    icone = iconeAviso;
+    titulo = aviso.kind;
+    linha = agora !== null ? `alerta para ${quando(aviso.starts_at, agora)}` : "alerta do INMET";
     corLinha = corAviso;
     toque = onAviso;
-    rotuloToque = `${aviso.kind} a caminho, ${janela(aviso)}. Ver o aviso do INMET`;
+    rotuloToque = `Alerta do INMET: ${aviso.kind}, ${SEVERITY[aviso.severity].label}, ${janela(aviso)}. Ver o aviso`;
   } else {
     titulo = carregando ? "Olhando a cidade" : "Tudo calmo";
     linha = rotulo;
@@ -167,10 +181,10 @@ export default function CeuDoApp({ rotulo, ultimos, carregando = false, onAbrirP
         ref={ref}
         className="absolute left-1/2 top-[max(0.75rem,env(safe-area-inset-top))] z-10 flex w-max max-w-[calc(100vw-1.5rem)] -translate-x-1/2 flex-col items-center gap-3"
       >
-        <div className="sala-escura flex h-[66px] w-[min(26rem,calc(100vw-1.5rem))] max-w-full items-center gap-3 rounded-full border-[1.5px] border-luz/60 bg-[linear-gradient(180deg,#23336e,#0f1a44)] pl-5 pr-2.5 text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_0_0_5px_rgba(255,210,122,0.09),0_16px_34px_rgba(0,0,0,0.55)] light:shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_0_0_5px_rgba(255,210,122,0.14),0_16px_34px_rgba(16,40,110,0.4)]">
+        <div className="sala-escura flex h-[66px] w-[min(26rem,calc(100vw-1.5rem))] max-w-full items-center gap-3 rounded-full border-[1.5px] border-luz/60 bg-[linear-gradient(180deg,#23336e,#0f1a44)] pl-4 pr-2.5 min-[400px]:pl-5 text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_0_0_5px_rgba(255,210,122,0.16),0_0_28px_rgba(255,210,122,0.14),0_14px_28px_rgba(0,0,0,0.4)] light:shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_0_0_5px_rgba(255,210,122,0.14),0_16px_34px_rgba(16,40,110,0.4)]">
           <span className="flex shrink-0 items-center gap-2">
             <Mark size={32} />
-            <span className="font-display text-[25px] font-medium leading-none tracking-tight">viu</span>
+            <span className="hidden font-display text-[25px] font-medium leading-none tracking-tight min-[400px]:inline">viu</span>
           </span>
           <span className="h-[30px] w-px shrink-0 bg-white/20" aria-hidden="true" />
           {toque ? (
@@ -247,7 +261,7 @@ export function BotaoConta({ progress, onClick }: { progress: Progress | null; o
         )}
       </svg>
       {progress ? (
-        <Olheiro nivel={progress.level - 1} tam={20} className="relative -mt-1" />
+        <Olheiro nivel={progress.level - 1} tam={17} className="relative mt-0.5" />
       ) : (
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#0a1230" strokeWidth="2" strokeLinecap="round" className="relative" aria-hidden="true">
           <circle cx="12" cy="8" r="4" />

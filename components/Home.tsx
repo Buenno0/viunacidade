@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase/client";
-import { principal, resumo, type CityAlert } from "@/lib/alerts";
+import { principal, type CityAlert } from "@/lib/alerts";
 import { waitPublished } from "@/lib/posting";
 import { markSeen, useSeen } from "@/lib/seen";
 import { locationWorkedBefore, permissionState } from "@/lib/useLocation";
@@ -774,18 +774,20 @@ export default function Home() {
                 action={<Button variant="secundario" onClick={() => setFilter(null)}>Ver tudo</Button>}
               />
             ) : aviso ? (
-              // Com aviso do tempo valendo, a tela vazia deixa de informar e
-              // passa a pedir: é o momento em que a pessoa tem o que fotografar.
+              // Com aviso do tempo, a tela vazia deixa de informar e passa a
+              // pedir: é o momento em que a pessoa tem o que fotografar. O aviso
+              // em si já está na pílula do topo; aqui ele é só o contexto.
               <EmptyState
                 topo={<Olheiro nivel={progress ? progress.level - 1 : 1} tam={40} />}
-                title={aviso.live ? `${aviso.kind} na cidade` : `${aviso.kind} a caminho`}
+                title="Viu alguma coisa?"
                 action={
                   <Button variant="secundario" onClick={startAsk}>
                     <QuestionIcon /> Perguntar o que está rolando
                   </Button>
                 }
               >
-                {resumo(aviso)}. Ninguém registrou nada ainda. Está vendo alguma coisa na rua?
+                Com o alerta de {aviso.kind.toLowerCase()} {aviso.live ? "valendo" : "a caminho"}, ninguém registrou nada ainda. Está vendo
+                alguma coisa na rua?
               </EmptyState>
             ) : (
               <EmptyState
