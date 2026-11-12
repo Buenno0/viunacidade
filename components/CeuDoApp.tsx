@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
-import { SEVERITY, severityVar, type CityAlert } from "@/lib/alerts";
+import { SEVERITY, janela, severityVar, type CityAlert } from "@/lib/alerts";
+
 import { CATEGORIES, severityVar as corDaCategoria } from "@/lib/categories";
 import { isFresh, timeAgo, type PostFeature } from "@/lib/posts";
 import { levelName, levelProgress, type Progress } from "@/lib/progress";
@@ -19,12 +20,28 @@ import { BellIcon, CategoryIcon } from "./ui/icons";
 //
 // O pulso da cidade é o meio da pílula: o que aconteceu por último (os três
 // mais recentes se alternam devagar) e quanto tem no ar; o toque abre o story.
-// Aviso do INMET valendo tem prioridade. Sem nada no ar, "Tudo calmo". A hora
+// Aviso do INMET valendo tem prioridade; o que ainda vai começar aparece
+// quando não há post no ar ("Tempestade a caminho"). Sem nada, "Tudo calmo". A hora
 // saiu: o celular já mostra o relógio na barra de cima.
 //
 // A pílula e os filtros ocupam só a própria largura: o resto do mapa continua
 // arrastável, e nenhum ancestral leva pointer-events-none (no iPhone, rolagem
 // horizontal dentro de um elemento assim não rola). O véu é irmão, não pai.
+
+// Quando o aviso começa, curto para caber na pílula: "23:00" se for hoje,
+// "sex 0h" se for outro dia (o janela() completo vai no rótulo de leitura)
+const TZ = "America/Sao_Paulo";
+const diaCidade = new Intl.DateTimeFormat("en-CA", { timeZone: TZ });
+const horaCurta = new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: TZ });
+const semana = new Intl.DateTimeFormat("pt-BR", { weekday: "short", timeZone: TZ });
+function comeco(iso: string, agora: number) {
+  const d = new Date(iso);
+  const hoje = diaCidade.format(d) === diaCidade.format(new Date(agora));
+  // hora cheia vira "0h", "23h"; o resto fica "14:30"
+  const [h, m] = horaCurta.format(d).split(":");
+  const hora = m === "00" ? `${Number(h)}h` : `${h}:${m}`;
+  return hoje ? hora : `${semana.format(d).replace(".", "")} ${hora}`;
+}
 
 // Aviso do INMET de chuva forte: o registrar sugere Alagamento primeiro
 export const ehTempestade = (a: CityAlert | null) => Boolean(a?.live && /tempest|chuv|temporal|granizo|vendaval/i.test(a.kind));
@@ -115,13 +132,20 @@ export default function CeuDoApp({ rotulo, ultimos, carregando = false, onAbrirP
     linha = `${agora !== null ? timeAgo(post.created_at, agora) : ""} · ${rotulo}`;
     toque = () => onAbrirPost(post.id);
     rotuloToque = `${nome}, ${agora !== null ? timeAgo(post.created_at, agora) : ""}. Ver o post. ${rotulo}`;
+  } else if (aviso && !carregando) {
+    // o aviso que ainda vai começar: avisa antes, quando o mapa está quieto
+    titulo = <span style={{ color: corAviso }}>{aviso.kind}</span>;
+    linha = agora !== null ? `a caminho · ${comeco(aviso.starts_at, agora)}` : "a caminho";
+    corLinha = corAviso;
+    toque = onAviso;
+    rotuloToque = `${aviso.kind} a caminho, ${janela(aviso)}. Ver o aviso do INMET`;
   } else {
     titulo = carregando ? "Olhando a cidade" : "Tudo calmo";
     linha = rotulo;
   }
 
   const pulso = (
-    <span key={post?.id ?? (aviso?.live ? "aviso" : dia ?? (carregando ? "carregando" : "calmo"))} className="pulso-entra flex min-w-0 items-center gap-2.5">
+    <span key={post?.id ?? (aviso ? "aviso" : dia ?? (carregando ? "carregando" : "calmo"))} className="pulso-entra flex min-w-0 items-center gap-2.5">
       {icone}
       <span className="flex min-w-0 flex-col items-start gap-[3px] leading-none">
         <span className="max-w-full truncate text-[16px] font-bold">{titulo}</span>
