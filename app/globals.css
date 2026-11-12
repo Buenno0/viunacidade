@@ -327,6 +327,11 @@ body {
    O pin do mapa é a marca: a foto no olho, o anel do tempo em volta dela
    (stroke-dasharray posto pelo CityMap) e o corpo na cor da severidade. A
    faixa ao vivo continua com o .pin redondo, de story. */
+/* os posts ficam por cima dos marcos da cidade (igreja, monumento): o
+   acontecimento é o assunto do mapa */
+.maplibregl-marker.pino {
+  z-index: 2;
+}
 .pino {
   --tam: 56px;
   position: relative;

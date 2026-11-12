@@ -2,18 +2,25 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Tag } from "@/components/ui/Tag";
+import { CategoryIcon } from "@/components/ui/icons";
+import CeuDoPost from "@/components/viewer/CeuDoPost";
+import Olheiro, { NIVEL_COR } from "./Olheiro";
 import { AccidentScene, EventScene, FloodScene } from "./scenes";
+import { fmt } from "./time";
 import { useNear } from "./useNear";
 import { useT } from "./lang";
 
 // O visualizador do app (PostViewer) em miniatura: barras que enchem, cabeçalho
-// com a categoria e a legenda sobre o desfoque. Mesmas classes do globals.css.
+// com a categoria, o céu da hora em que a foto foi tirada e a legenda sobre o
+// desfoque; quem confirmou aparece como Olheiros. Mesmas classes do globals.css.
 // os textos de cada story vêm do i18n (stories.items), na mesma ordem
 const STORIES = [
-  { Scene: AccidentScene, color: "var(--danger)", tag: "agora" as const },
-  { Scene: EventScene, color: "var(--accent)", tag: "alta" as const },
-  { Scene: FloodScene, color: "var(--warn)", tag: "agora" as const },
+  { Scene: AccidentScene, cat: "acidente" as const, color: "var(--danger)", tag: "agora" as const, hora: 18.7 },
+  { Scene: EventScene, cat: "evento" as const, color: "var(--accent)", tag: "alta" as const, hora: 21.2 },
+  { Scene: FloodScene, cat: "alagamento" as const, color: "var(--warn)", tag: "agora" as const, hora: 6.3 },
 ];
+// os Olheiros de quem confirmou: um por pessoa, até três, de níveis diferentes
+const CONFIRMARAM = [0, 1, 3];
 const STORY_MS = 5000;
 
 // start: abre num story (pin do hero); onClose: mostra o X (modo sobreposição)
@@ -81,10 +88,20 @@ export default function StoryDemo({ start = 0, onClose }: { start?: number; onCl
           ))}
         </div>
         <div key={`t${i}`} className="story-entra flex items-center gap-2.5">
-          <span className="h-8 w-8 shrink-0 rounded-full border-[1.5px]" style={{ borderColor: s.color, background: `color-mix(in oklab, ${s.color} 22%, transparent)` }} />
+          <span
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full border-[1.5px]"
+            style={{ borderColor: s.color, color: s.color, background: `color-mix(in oklab, ${s.color} 22%, transparent)` }}
+          >
+            <CategoryIcon category={STORIES[i].cat} width="15" height="15" />
+          </span>
           <div className="min-w-0 flex-1">
-            <p className="m-0 truncate text-sm font-semibold [text-shadow:0_1px_6px_rgb(0_0_0/0.6)]">{s.cat}</p>
-            <p className="lp-legenda-p m-0 text-ink/85">{s.ago}</p>
+            <p className="m-0 truncate text-sm font-semibold [text-shadow:0_1px_6px_rgb(0_0_0/0.6)]">{t.items[i].cat}</p>
+            <p className="lp-legenda-p m-0 flex items-center gap-1.5 text-ink/85">
+              <CeuDoPost hora={s.hora} />
+              <span>
+                <span className="lp-num text-ink">{fmt(s.hora)}</span> · {s.ago}
+              </span>
+            </p>
           </div>
           {onClose && (
             <button
@@ -104,7 +121,14 @@ export default function StoryDemo({ start = 0, onClose }: { start?: number; onCl
           <Tag kind={s.tag} label={T.tags[s.tag]} />
         </div>
         <p className="lp-disp m-0 text-lg leading-tight [text-shadow:0_1px_10px_rgb(0_0_0/0.55)]">{s.caption}</p>
-        <p className="lp-legenda-p m-0 text-ink/85">{s.meta}</p>
+        <p className="lp-legenda-p m-0 flex items-end gap-2 text-ink/85">
+          <span className="flex shrink-0 items-end" aria-hidden="true">
+            {CONFIRMARAM.map((n) => (
+              <Olheiro key={n} nivel={n} cor={NIVEL_COR[n]} tam={16} className="-mr-0.5" />
+            ))}
+          </span>
+          <span>{s.meta}</span>
+        </p>
         <div className="flex gap-2">
           <span className="story-pill story-vidro flex-1 justify-center whitespace-nowrap !px-2 text-xs">{t.still}</span>
           <span className="story-pill story-vidro flex-1 justify-center whitespace-nowrap !px-2 text-xs">{t.over}</span>

@@ -1,9 +1,11 @@
-// O pino do app na miniatura (app/globals.css): foto redonda, anel do tempo na cor da severidade, ponteiro.
+// O pino do app na miniatura (app/globals.css, ".pino"): o pino-olho da marca, com o corpo na cor da severidade, a
+// foto no olho e o anel do tempo em volta dela.
 // Pousa com a curva do pin-pousa e o halo dourado; "Agora" pulsa em coral; "Em alta" cresce e ganha o brilho
 // girando; quando o tempo acaba, some com um "puf". Tudo em coordenadas do mundo, a partir do tempo t (s).
 import React from 'react';
 import { MONO } from '../fontes';
 import { Foto, type NomeIlustracao } from '../ilustracoes';
+import { PINO_PATH } from '../componentes/Marca';
 import { COR, SEVERIDADE, type Severidade } from '../tema';
 import { cl, iso, outBack, outCubic, TAU } from './iso';
 
@@ -39,23 +41,26 @@ export const chaves = (k: Array<[number, number]>, t: number) => {
   return k[k.length - 1][1];
 };
 
-export const RAIO = 20.5;
-const CIRC = 2 * Math.PI * 18;
+export const RAIO = 21.6;
+// o pino-olho a 0,6: a cabeça (raio 36 na caixa de 100×120) fica com 21,6, a foto com 16,2 e o anel com 18,6
+const K = 0.6;
+const ANEL = 31 * K;
+const CIRC = 2 * Math.PI * ANEL;
 
-// A cabeça do pino (foto redonda, trilha e anel do tempo), centrada na origem. Usada também no pino em voo.
+// A cabeça do pino (o pino-olho com a foto no olho e o anel do tempo), centrada no olho. Usada também no pino em voo.
 export const CabecaPino: React.FC<{ foto: NomeIlustracao; t: number; fracao: number; sev: Severidade; brilho?: number }> = ({ foto, t, fracao, sev, brilho = 0 }) => {
   const s = SEVERIDADE[sev];
   return (
     <>
-      <polygon points="-6,16 6,16 0,24" fill={COR.bg} />
-      <circle r={RAIO} fill={COR.bg} />
+      <path d={PINO_PATH} transform={`translate(${-50 * K} ${-46 * K}) scale(${K})`} fill={s.cor} stroke={COR.bg} strokeOpacity={0.35} strokeWidth={4} />
+      <circle r={16.2} fill={COR.elev} />
       <g clipPath="url(#clip-foto-pino)">
         <Foto nome={foto} t={t} x={-15.5} y={-15.5} largura={31} altura={31} quadrado />
       </g>
-      <circle r={18} fill="none" stroke={s.trilha} strokeWidth={3.2} />
-      <circle r={18} fill="none" stroke={s.cor} strokeWidth={3.2} transform="rotate(-90)" strokeDasharray={`${(fracao * CIRC).toFixed(2)} ${CIRC.toFixed(2)}`} />
+      <circle r={ANEL} fill="none" stroke={COR.bg} strokeOpacity={0.22} strokeWidth={3} />
+      <circle r={ANEL} fill="none" stroke={COR.bg} strokeWidth={3} strokeLinecap="round" transform="rotate(-90)" strokeDasharray={`${(fracao * CIRC).toFixed(2)} ${CIRC.toFixed(2)}`} />
       {brilho > 0 && (
-        <circle r={18} fill="none" stroke="#ffecbe" strokeWidth={3.2} strokeDasharray={`16 ${(CIRC - 16).toFixed(1)}`} opacity={brilho} transform={`rotate(${((t * 150) % 360).toFixed(1)})`} />
+        <circle r={RAIO + 3} fill="none" stroke={COR.accent} strokeWidth={2.4} strokeDasharray={`18 ${(2 * Math.PI * (RAIO + 3) - 18).toFixed(1)}`} opacity={brilho} transform={`rotate(${((t * 150) % 360).toFixed(1)})`} />
       )}
     </>
   );
@@ -118,7 +123,7 @@ export const Pino: React.FC<{ p: SpecPino; t: number }> = ({ p, t }) => {
           <CabecaPino foto={p.foto} t={t} fracao={fracao} sev={p.sev} brilho={altaV} />
         </g>
         {agoraV > 0 && (
-          <Selo x={p.seloEsquerda ? -27 - 64 : 27} y={-p.H} largura={64} fundo="rgba(12,10,8,.88)" borda="rgba(224,129,99,.6)" opacidade={agoraV}>
+          <Selo x={p.seloEsquerda ? -27 - 64 : 27} y={-p.H} largura={64} fundo="rgba(10,18,48,.88)" borda="rgba(255,107,107,.6)" opacidade={agoraV}>
             <circle cx={12} cy={0} r={3.5 * (1 + 1.8 * ping)} fill={COR.danger} opacity={1 - ping} />
             <circle cx={12} cy={0} r={3.5} fill={COR.danger} />
             <text x={22} y={4} fill={COR.ink} fontFamily={MONO} fontSize={11} fontWeight={500}>Agora</text>

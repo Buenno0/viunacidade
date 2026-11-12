@@ -1,7 +1,7 @@
 // Peças comuns das cenas do explicativo: câmera da miniatura, espera das fontes, cartela de texto.
 import React from 'react';
 import { continueRender, delayRender } from 'remotion';
-import { ARCHIVO, MONO } from '../fontes';
+import { TITULO, MONO } from '../fontes';
 import type { Camera } from '../hero/Hero';
 import { cl, outBack } from '../miniatura/iso';
 import { COR } from '../tema';
@@ -20,7 +20,7 @@ const carregada = (familia: string) => {
   document.fonts.forEach((f) => { if (f.family.replace(/"/g, '') === familia && f.status === 'loaded') ok = true; });
   return ok;
 };
-const fontesCarregadas = () => carregada(ARCHIVO) && carregada(MONO);
+const fontesCarregadas = () => carregada(TITULO) && carregada(MONO);
 
 // Se a fonte já está carregada, a medida sai no mesmo quadro. Se não, o quadro espera e só é liberado depois que o
 // layout medido já foi desenhado (o continueRender roda no efeito, depois do commit).
@@ -56,7 +56,7 @@ export const Cartela: React.FC<{
   const fora = saida !== undefined ? cl((t - saida) / 0.35) : 0;
   let n = 0;
   return (
-    <div style={{ fontFamily: ARCHIVO, fontWeight: peso, fontSize: tamanho, lineHeight: 1.08, letterSpacing: '-0.015em', color: cor, ...style }}>
+    <div style={{ fontFamily: TITULO, fontWeight: peso, fontSize: tamanho, lineHeight: 1.08, letterSpacing: '-0.015em', color: cor, ...style }}>
       {linhas.map((palavras, li) => (
         <div key={li} style={{ whiteSpace: 'nowrap' }}>
           {palavras.map((p, i) => {

@@ -22,12 +22,12 @@ export type Cidade = {
 // Períodos que dividem o loop de 14 s: o pisca das janelas emenda no começo
 const PERIODOS = [14, 7, 14 / 3];
 
-const PREDIO = ['#2c3038', '#1f2228', '#16191e'];
-const PEDRA = [CENA.pedra, '#bfb39b', '#a69a83'];
-const CREME = [CENA.creme, '#cfc6b8', '#b8ae9f'];
-const OCRE = ['#c9a46a', '#b08c55', '#957644'];
-const SALVIA = ['#9fb7a4', '#87a08d', '#708877'];
-const TELHA = [CENA.telhaEscura, CENA.telha, '#86502a'];
+const PREDIO = ['#2f4a9e', '#22397f', '#1a2d68'];
+const PEDRA = [CENA.pedra, '#a9b5de', '#8492c6'];
+const CREME = [CENA.creme, '#c4cce8', '#a3aed6'];
+const OCRE = ['#ffb9a1', '#f08f6f', '#c96f53'];
+const SALVIA = ['#8fe3cf', '#5fd3b8', '#3fa58e'];
+const TELHA = [CENA.telhaEscura, CENA.telha, '#8577e4'];
 
 export const RUAS: Array<[number, number]> = [[2.2, 2.8], [5.0, 5.6]];
 export const BORDA: [number, number] = [-0.4, 8.2];
@@ -76,7 +76,7 @@ export function criarCidade(): Cidade {
         j.push({ pontos: pts([iso(x, y1, z), iso(x + 0.13, y1, z), iso(x + 0.13, y1, z + 5), iso(x, y1, z + 5)]), cor: CENA.luzJanela, fase: rnd() * TAU, periodo: PERIODOS[Math.floor(rnd() * 3)], acesa: rnd() < dens });
       }
       for (let y = y0 + 0.1; y + 0.13 <= y1 - 0.05; y += 0.26) {
-        j.push({ pontos: pts([iso(x1, y, z), iso(x1, y + 0.13, z), iso(x1, y + 0.13, z + 5), iso(x1, y, z + 5)]), cor: '#d9a95a', fase: rnd() * TAU, periodo: PERIODOS[Math.floor(rnd() * 3)], acesa: rnd() < dens * 0.8 });
+        j.push({ pontos: pts([iso(x1, y, z), iso(x1, y + 0.13, z), iso(x1, y + 0.13, z + 5), iso(x1, y, z + 5)]), cor: '#ffd27a', fase: rnd() * TAU, periodo: PERIODOS[Math.floor(rnd() * 3)], acesa: rnd() < dens * 0.8 });
       }
     }
   };
@@ -110,27 +110,27 @@ export function criarCidade(): Cidade {
   }
   for (const a of QUADRAS) for (const b of QUADRAS) poly(chao, [iso(a[0], b[0]), iso(a[1], b[0]), iso(a[1], b[1]), iso(a[0], b[1])], CENA.calcada);
   poly(chao, [iso(2.9, 2.9), iso(4.9, 2.9), iso(4.9, 4.9), iso(2.9, 4.9)], CENA.praca);
-  poly(chao, [iso(3.8, 2.9), iso(4.0, 2.9), iso(4.0, 4.9), iso(3.8, 4.9)], '#26342c');
-  poly(chao, [iso(2.9, 3.8), iso(4.9, 3.8), iso(4.9, 4.0), iso(2.9, 4.0)], '#26342c');
+  poly(chao, [iso(3.8, 2.9), iso(4.0, 2.9), iso(4.0, 4.9), iso(3.8, 4.9)], '#1b2f6b');
+  poly(chao, [iso(2.9, 3.8), iso(4.9, 3.8), iso(4.9, 4.0), iso(2.9, 4.0)], '#1b2f6b');
   for (const r of RUAS) {
     const m = (r[0] + r[1]) / 2;
-    seg(chao, iso(G0, m), iso(G1, m), '#4d5461', 1, { strokeDasharray: '5 7' });
-    seg(chao, iso(m, G0), iso(m, G1), '#4d5461', 1, { strokeDasharray: '5 7' });
+    seg(chao, iso(G0, m), iso(G1, m), '#2f4a9a', 1, { strokeDasharray: '5 7' });
+    seg(chao, iso(m, G0), iso(m, G1), '#2f4a9a', 1, { strokeDasharray: '5 7' });
   }
-  poly(chao, [iso(G0, G0), iso(G1, G0), iso(G1, G1), iso(G0, G1)], 'none', { stroke: '#e0a84e', strokeWidth: 1.5, strokeDasharray: '6 4', opacity: 0.8 });
+  poly(chao, [iso(G0, G0), iso(G1, G0), iso(G1, G1), iso(G0, G1)], 'none', { stroke: '#ffd27a', strokeWidth: 1.5, strokeDasharray: '6 4', opacity: 0.8 });
 
   // Catedral (o marco: azulejo flutuando em cima, desenhado no céu)
   peca(2.3, (f) => {
     caixa(f, 0.35, 0.4, 1.85, 1.45, 28, PEDRA);
-    telhado(f, 0.35, 0.4, 1.85, 1.45, 28, 10, [CENA.telhaEscura, CENA.telha, '#bfb39b']);
+    telhado(f, 0.35, 0.4, 1.85, 1.45, 28, 10, [CENA.telhaEscura, CENA.telha, '#a9b5de']);
     caixa(f, 0.35, 1.45, 0.8, 1.9, 52, PEDRA);
     piramide(f, 0.35, 1.45, 0.8, 1.9, 52, 16, [CENA.telha, CENA.telhaEscura]);
     caixa(f, 0.8, 1.55, 1.4, 1.85, 34, PEDRA);
-    poly(f, [iso(1.0, 1.85, 0), iso(1.2, 1.85, 0), iso(1.2, 1.85, 12), iso(1.0, 1.85, 12)], '#3a2a1f');
+    poly(f, [iso(1.0, 1.85, 0), iso(1.2, 1.85, 0), iso(1.2, 1.85, 12), iso(1.0, 1.85, 12)], '#1e2b6b');
     caixa(f, 1.4, 1.45, 1.85, 1.9, 52, PEDRA);
     piramide(f, 1.4, 1.45, 1.85, 1.9, 52, 16, [CENA.telha, CENA.telhaEscura]);
     for (const p of [[0.5, 1.9], [1.55, 1.9]]) poly(f, [iso(p[0], p[1], 30), iso(p[0] + 0.12, p[1], 30), iso(p[0] + 0.12, p[1], 44), iso(p[0], p[1], 44)], CENA.luzJanela);
-    poly(f, [iso(1.85, 1.58, 30), iso(1.85, 1.74, 30), iso(1.85, 1.74, 44), iso(1.85, 1.58, 44)], '#d9a95a');
+    poly(f, [iso(1.85, 1.58, 30), iso(1.85, 1.74, 30), iso(1.85, 1.74, 44), iso(1.85, 1.58, 44)], '#ffd27a');
     for (const c of [[0.575, 1.675], [1.625, 1.675]]) {
       const m = iso(c[0], c[1], 74);
       seg(f, iso(c[0], c[1], 68), iso(c[0], c[1], 77), COR.accent, 1.4);
@@ -145,19 +145,19 @@ export function criarCidade(): Cidade {
   // obra: esqueleto do prédio, base e torre do guindaste (a lança gira no céu), cavaletes e cones
   peca(7.25, (f) => {
     const [x0, x1, y0, y1] = [5.8, 6.9, 0.3, 1.5];
-    poly(f, [iso(x0, y0), iso(x1, y0), iso(x1, y1), iso(x0, y1)], '#2a2d33');
-    for (const z of [12, 24]) poly(f, [iso(x0, y0, z), iso(x1, y0, z), iso(x1, y1, z), iso(x0, y1, z)], '#3a3f48', { stroke: '#6b7380', strokeWidth: 1, opacity: 0.85 });
-    poly(f, [iso(x0, y0, 34), iso(x1, y0, 34), iso(x1, y1, 34), iso(x0, y1, 34)], 'none', { stroke: '#8a919c', strokeWidth: 1 });
-    for (const p of [[x0, y1], [x1, y1], [x1, y0], [(x0 + x1) / 2, y1], [x1, (y0 + y1) / 2]]) seg(f, iso(p[0], p[1], 0), iso(p[0], p[1], 34), '#8a919c', 1.6);
+    poly(f, [iso(x0, y0), iso(x1, y0), iso(x1, y1), iso(x0, y1)], '#1b2f6b');
+    for (const z of [12, 24]) poly(f, [iso(x0, y0, z), iso(x1, y0, z), iso(x1, y1, z), iso(x0, y1, z)], '#22377a', { stroke: '#4a5f9e', strokeWidth: 1, opacity: 0.85 });
+    poly(f, [iso(x0, y0, 34), iso(x1, y0, 34), iso(x1, y1, 34), iso(x0, y1, 34)], 'none', { stroke: '#6b7fbf', strokeWidth: 1 });
+    for (const p of [[x0, y1], [x1, y1], [x1, y0], [(x0 + x1) / 2, y1], [x1, (y0 + y1) / 2]]) seg(f, iso(p[0], p[1], 0), iso(p[0], p[1], 34), '#6b7fbf', 1.6);
   });
   peca(8.05, (f) => {
-    caixa(f, 7.15, 0.5, 7.55, 0.9, 4, ['#6b7380', '#4d5461', '#3a3f48']);
-    caixa(f, 7.29, 0.64, 7.41, 0.76, 100, [COR.warn, '#c08f3a', '#9a722b']);
+    caixa(f, 7.15, 0.5, 7.55, 0.9, 4, ['#4a5f9e', '#2f4a9a', '#22377a']);
+    caixa(f, 7.29, 0.64, 7.41, 0.76, 100, [COR.warn, '#e0a225', '#b97f12']);
     for (let z = 6; z < 98; z += 8) seg(f, iso(7.29, 0.76, z), iso(7.41, 0.76, z + 8), COR.accentInk, 0.8);
   });
   for (const x of [5.8, 6.25, 6.7, 7.15]) {
     peca(x + 2.165, (f) => {
-      caixa(f, x, 1.95, x + 0.35, 2.03, 6, [COR.warn, '#c08f3a', '#9a722b']);
+      caixa(f, x, 1.95, x + 0.35, 2.03, 6, [COR.warn, '#e0a225', '#b97f12']);
       for (let k = 0; k < 4; k += 2) {
         const a = x + k * 0.0875;
         const b = a + 0.0875;
@@ -180,7 +180,7 @@ export function criarCidade(): Cidade {
   const arvore = (x: number, y: number, r: number) =>
     peca(x + y, (f) => {
       const c = iso(x, y, 13);
-      seg(f, iso(x, y), c, '#4a3324', 2.2);
+      seg(f, iso(x, y), c, '#2a2350', 2.2);
       circ(f, [c[0], c[1] - 2], r, CENA.folha);
       circ(f, [c[0] - 2.5, c[1] - 5], +(r * 0.55).toFixed(1), CENA.folhaClara);
     });
@@ -223,7 +223,7 @@ export function criarCidade(): Cidade {
       peca(x + y + 0.55, (f) => {
         const [x1, y1, ym, n] = [x + 0.55, y + 0.55, y + 0.275, 4];
         const dx = 0.55 / n;
-        caixa(f, x + 0.03, y + 0.36, x1 - 0.03, y1 - 0.02, 4, ['#6b4a33', '#5a3e2b', '#4a3324']);
+        caixa(f, x + 0.03, y + 0.36, x1 - 0.03, y1 - 0.02, 4, ['#7465d6', '#5b4fc0', '#2a2350']);
         for (const p of [[x, y1], [x1, y1], [x1, y]]) seg(f, iso(p[0], p[1]), iso(p[0], p[1], 9), COR.muted, 1);
         for (let k = 0; k < n; k++) poly(f, [iso(x + k * dx, y, 9), iso(x + (k + 1) * dx, y, 9), iso(x + (k + 1) * dx, ym, 14), iso(x + k * dx, ym, 14)], c[k % 2], { opacity: 0.9 });
         for (let k = 0; k < n; k++) poly(f, [iso(x + k * dx, y1, 9), iso(x + (k + 1) * dx, y1, 9), iso(x + (k + 1) * dx, ym, 14), iso(x + k * dx, ym, 14)], c[k % 2]);
@@ -237,11 +237,11 @@ export function criarCidade(): Cidade {
   }
 
   // gente (sem rosto): só corpo e cabeça
-  for (const [x, y, cor] of [[6.35, 3.78, COR.ok], [7.05, 3.82, COR.danger], [5.95, 4.72, COR.muted], [6.8, 4.68, '#3a5a8a'], [3.5, 4.3, COR.warn], [4.3, 3.5, CENA.creme], [3.62, 3.52, '#b5523a'], [6.45, 7.95, CENA.creme], [6.7, 8.0, '#3a5a8a']] as Array<[number, number, string]>) {
+  for (const [x, y, cor] of [[6.35, 3.78, COR.ok], [7.05, 3.82, COR.danger], [5.95, 4.72, COR.muted], [6.8, 4.68, '#79bcff'], [3.5, 4.3, COR.warn], [4.3, 3.5, CENA.creme], [3.62, 3.52, '#f08f6f'], [6.45, 7.95, CENA.creme], [6.7, 8.0, '#79bcff']] as Array<[number, number, string]>) {
     peca(x + y, (f) => {
       const p = iso(x, y);
       f.push({ el: 'rect', a: { x: (p[0] - 2.2).toFixed(1), y: (p[1] - 9).toFixed(1), width: 4.4, height: 8, rx: 2, fill: cor } });
-      circ(f, [p[0], p[1] - 11], 2.2, '#cfc6b8');
+      circ(f, [p[0], p[1] - 11], 2.2, '#c4cce8');
     });
   }
 
@@ -254,8 +254,8 @@ export function criarCidade(): Cidade {
   peca(3.85 + 6.45, (f) => {
     caixa(f, 3.1, 5.65, 4.6, 5.95, 11, PREDIO);
     poly(f, [iso(3.7, 5.95), iso(4.0, 5.95), iso(4.0, 5.95, 7), iso(3.7, 5.95, 7)], CENA.luzJanela);
-    for (const p of [[3.6, 6.3], [4.05, 6.3]]) caixa(f, p[0], p[1], p[0] + 0.14, p[1] + 0.2, 7, [COR.ok, '#5f8f78', '#4b7360']);
-    for (const p of [[3.15, 6.75], [4.55, 6.75], [4.55, 6.15]]) seg(f, iso(p[0], p[1]), iso(p[0], p[1], 12), '#cfc6b8', 1.6);
+    for (const p of [[3.6, 6.3], [4.05, 6.3]]) caixa(f, p[0], p[1], p[0] + 0.14, p[1] + 0.2, 7, [COR.ok, '#3fa58e', '#2e8a74']);
+    for (const p of [[3.15, 6.75], [4.55, 6.75], [4.55, 6.15]]) seg(f, iso(p[0], p[1]), iso(p[0], p[1], 12), '#c4cce8', 1.6);
     caixa(f, 3.05, 6.05, 4.65, 6.85, 3, CREME, 12);
     poly(f, [iso(3.05, 6.85, 12), iso(4.65, 6.85, 12), iso(4.65, 6.85, 13.5), iso(3.05, 6.85, 13.5)], COR.ok);
   });
@@ -267,8 +267,8 @@ export function criarCidade(): Cidade {
   // "Seu Comércio": o café de exemplo (nunca um comércio real), com toldo listrado e vitrine acesa
   peca(5.85 + 7.6, (f) => {
     const [x0, y0, x1, y1] = [5.85, 6.9, 6.6, 7.6];
-    caixa(f, x0, y0, x1, y1, 12, ['#b5523a', '#9c4530', '#843a28']);
-    poly(f, [iso(x0, y0, 12), iso(x1, y0, 12), iso(x1, y1, 12), iso(x0, y1, 12)], '#6e3324');
+    caixa(f, x0, y0, x1, y1, 12, ['#f08f6f', '#c96f53', '#a8533d']);
+    poly(f, [iso(x0, y0, 12), iso(x1, y0, 12), iso(x1, y1, 12), iso(x0, y1, 12)], '#8a4030');
     poly(f, [iso(x0 + 0.1, y1, 1.5), iso(x1 - 0.1, y1, 1.5), iso(x1 - 0.1, y1, 7.5), iso(x0 + 0.1, y1, 7.5)], CENA.luzJanela);
     const n = 6;
     for (let k = 0; k < n; k++) {
@@ -283,7 +283,7 @@ export function criarCidade(): Cidade {
   for (const [x, y] of [[2.15, 0.6], [2.15, 4.4], [5.65, 3.2], [5.65, 6.75], [1.0, 2.85], [4.4, 2.15], [6.9, 4.95], [1.6, 5.65]]) {
     peca(x + y, (f) => {
       const c = iso(x, y, 16);
-      seg(f, iso(x, y), c, '#4d5461', 1.3);
+      seg(f, iso(x, y), c, '#2f4a9a', 1.3);
       circ(f, c, 2.2, CENA.luz);
     });
   }
@@ -299,12 +299,12 @@ export function criarCidade(): Cidade {
       const s = i / 8;
       caminho.push([ac[0] + (b[0] - ac[0]) * s, ac[1] + (b[1] - ac[1]) * s + 7 * Math.sin(Math.PI * s)]);
     }
-    fios.push({ el: 'polyline', a: { points: pts(caminho), fill: 'none', stroke: '#4d5461', strokeWidth: 0.8 } });
+    fios.push({ el: 'polyline', a: { points: pts(caminho), fill: 'none', stroke: '#2f4a9a', strokeWidth: 0.8 } });
     for (let i = 1; i < 8; i++) luzes.push({ x: caminho[i][0], y: caminho[i][1], fase: rnd() * TAU });
   }
 
   // carros: duas faixas por rua, um ou dois carros por faixa; voltas inteiras por loop para emendar
-  const CORES = [CENA.creme, COR.muted, '#6b7380', '#b5523a', '#3a5a8a', COR.accent, '#cfc6b8', COR.ok];
+  const CORES = [CENA.creme, COR.muted, '#4a5f9e', '#f08f6f', '#79bcff', COR.accent, '#c4cce8', COR.ok];
   const DIRS: Array<[Faixa['dir'], number]> = [['x+', 2.38], ['x-', 2.62], ['x+', 5.18], ['x-', 5.42], ['y+', 2.38], ['y-', 2.62], ['y+', 5.18], ['y-', 5.42]];
   const faixas: Faixa[] = [];
   DIRS.forEach(([dir, c], i) => {
@@ -323,7 +323,7 @@ export function criarCidade(): Cidade {
 // Carros parados na fila do posto
 export const FILA_POSTO: Array<{ x: number; y: number; cor: string }> = [
   { x: 3.15, y: 7.05, cor: COR.muted },
-  { x: 3.65, y: 7.05, cor: '#3a5a8a' },
+  { x: 3.65, y: 7.05, cor: '#79bcff' },
   { x: 4.15, y: 7.05, cor: CENA.creme },
 ];
 

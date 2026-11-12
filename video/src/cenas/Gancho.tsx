@@ -1,9 +1,9 @@
 // Gancho "Viu ou ouviu?": bolhas cinza de "ouvi dizer" sobre a cidade apagada; "OUVIU?" aparece, o "OU" cai,
-// sobra "VIU." em ouro e a cidade acende. Bolhas genéricas, sem a cara de nenhum app de mensagem.
+// sobra "VIU." na luz da janela e a cidade acende. Bolhas genéricas, sem a cara de nenhum app de mensagem.
 import { measureText } from '@remotion/layout-utils';
 import React from 'react';
 import { AbsoluteFill, useVideoConfig } from 'remotion';
-import { ARCHIVO } from '../fontes';
+import { TITULO } from '../fontes';
 import { DefsMiniatura, viewBox, type Camera } from '../hero/Hero';
 import { Foto } from '../ilustracoes';
 import { LUGAR } from '../miniatura/cidade';
@@ -13,8 +13,8 @@ import { Pino } from '../miniatura/Pino';
 import { COR } from '../tema';
 import { useFontesProntas } from './comum';
 
-const BALAO = '#2a2622';
-const TEXTO_BALAO = '#d9d0c1';
+const BALAO = '#1a2756';
+const TEXTO_BALAO = '#d4daf2';
 
 const Balao: React.FC<{ x: number; y: number; t: number; de: number; giro: number; apaga: number; children: React.ReactNode }> = ({ x, y, t, de, giro, apaga, children }) => {
   const a = cl((t - de) / 0.35);
@@ -25,7 +25,7 @@ const Balao: React.FC<{ x: number; y: number; t: number; de: number; giro: numbe
       position: 'absolute', left: x, top: y, transformOrigin: '0% 100%',
       transform: `rotate(${giro}deg) scale(${(0.82 + 0.18 * e).toFixed(4)})`, opacity: cl(a * 2.5) * (1 - 0.8 * apaga),
       background: BALAO, color: TEXTO_BALAO, borderRadius: '30px 30px 30px 8px', padding: '22px 30px',
-      fontFamily: ARCHIVO, fontWeight: 500, fontSize: 40, lineHeight: 1.2, maxWidth: 700,
+      fontFamily: TITULO, fontWeight: 500, fontSize: 40, lineHeight: 1.2, maxWidth: 700,
     }}>
       {children}
     </div>
@@ -42,7 +42,7 @@ export const Gancho: React.FC<{ t: number; comCidade?: boolean; vertical?: boole
 
   // a palavra: "OU" + "VIU" + "?" → o "OU" cai e sobra "VIU."
   const tamanho = vertical ? 230 : 300;
-  const medir = (texto: string) => (prontas ? measureText({ text: texto, fontFamily: ARCHIVO, fontWeight: '700', fontSize: tamanho, letterSpacing: '-0.015em' }).width : texto.length * tamanho * 0.62);
+  const medir = (texto: string) => (prontas ? measureText({ text: texto, fontFamily: TITULO, fontWeight: '700', fontSize: tamanho, letterSpacing: '-0.015em' }).width : texto.length * tamanho * 0.62);
   const wOU = medir('OU');
   const wVIU = medir('VIU');
   const wQ = medir('?');
@@ -59,7 +59,7 @@ export const Gancho: React.FC<{ t: number; comCidade?: boolean; vertical?: boole
   const cor = ouro > 0.5 ? COR.accent : COR.muted;
   const sobe = cl((t - 6.6) / 0.6);
   const base = H / 2 + tamanho * 0.36 - outCubic(sobe) * 210;
-  const letra: React.CSSProperties = { position: 'absolute', top: base - tamanho, fontFamily: ARCHIVO, fontWeight: 700, fontSize: tamanho, lineHeight: 1, letterSpacing: '-0.015em' };
+  const letra: React.CSSProperties = { position: 'absolute', top: base - tamanho, fontFamily: TITULO, fontWeight: 700, fontSize: tamanho, lineHeight: 1, letterSpacing: '-0.015em' };
 
   const pinos = [
     { id: 'g1', ...LUGAR.feira, H: 66, sev: 'acc' as const, foto: 'feira' as const, t0: 5.8, f0: 0.95, f1: 0.9 },

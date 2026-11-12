@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { C, Ground, Road, iso } from "./iso";
+import { PINO_PATH } from "@/design/marca.mjs";
 
 // Sorteio com semente: a cena sai igual no servidor e no navegador
 function rng(seed: number) {
@@ -53,13 +54,29 @@ function Frame({ children, className, title, vb = "0 0 440 360" }: SceneProps & 
   );
 }
 
-// Pin do app flutuando sobre o acontecimento
+// O pin do app flutuando sobre o acontecimento: o pino-olho do mapa (a marca),
+// com o ícone no olho e o anel do tempo em volta, como no app. (x, y) é o
+// centro do olho; a ponta fica 34 abaixo, e um tracejado desce até o chão.
 function Pin({ x, y, color, children }: { x: number; y: number; color: string; children: ReactNode }) {
   return (
     <g>
-      <line x1={x} y1={y + 16} x2={x} y2={y + 40} stroke={color} strokeWidth="1.5" strokeDasharray="3 3" opacity=".7" />
-      <circle cx={x} cy={y} r="22" fill="none" stroke={color} strokeWidth="2" className="lp-svg-ping" />
-      <circle cx={x} cy={y} r="16" fill="#0a1230" stroke={color} strokeWidth="3" />
+      <line x1={x} y1={y + 34} x2={x} y2={y + 46} stroke={color} strokeWidth="1.5" strokeDasharray="3 3" opacity=".7" />
+      <circle cx={x} cy={y} r="26" fill="none" stroke={color} strokeWidth="2" className="lp-svg-ping" />
+      <path d={PINO_PATH} transform={`translate(${x - 25} ${y - 23}) scale(0.5)`} fill={color} stroke="#0a1230" strokeOpacity="0.35" strokeWidth="3" />
+      <circle cx={x} cy={y} r="13" fill="#0a1230" />
+      <circle cx={x} cy={y} r="15.5" fill="none" stroke="#0a1230" strokeOpacity="0.22" strokeWidth="2.5" />
+      <circle
+        cx={x}
+        cy={y}
+        r="15.5"
+        fill="none"
+        stroke="#0a1230"
+        strokeWidth="2.5"
+        pathLength={100}
+        strokeDasharray="72 100"
+        strokeLinecap="round"
+        transform={`rotate(-90 ${x} ${y})`}
+      />
       <g transform={`translate(${x - 8} ${y - 8})`} stroke={color} fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         {children}
       </g>

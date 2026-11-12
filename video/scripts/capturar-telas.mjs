@@ -1,7 +1,9 @@
 // Telas reais do app para o vídeo: celular 390×844 em 3×, tema escuro, localização simulada em Itapetininga,
 // logado como a conta de demonstração "voce@video.example.test" (scripts/semear-demo.mjs antes).
 //   node scripts/capturar-telas.mjs [seções…]      ex.: node scripts/capturar-telas.mjs mapa story
-// Usa o `next dev` que já estiver rodando (APP, padrão http://localhost:3000) com o Supabase local.
+// Usa o `next dev` que já estiver rodando (APP, padrão http://localhost:3000) com o Supabase local. O mapa mora em
+// /mapa (a raiz é a LP). As posições do que o vídeo toca ou recorta (botões, topo das folhas, cartões) são medidas
+// na página e vão para posicoes.json.
 // Saída: public/gerado/telas/<seção>-*.png
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
@@ -49,6 +51,13 @@ async function novaPagina(navegador, { logado = true, onde = [LAT, LNG] } = {}) 
   await page.emulateTimezone('America/Sao_Paulo');
   await page.setGeolocation({ latitude: onde[0], longitude: onde[1], accuracy: 8 });
   if (logado) await contexto.setCookie(...(await cookiesDaSessao(seed.voce.email)));
+  // o vídeo é de noite: o tema escuro fixo (o app segue a hora da cidade) e o cartão de baixo aberto
+  await page.evaluateOnNewDocument(() => {
+    try {
+      localStorage.setItem('deolho-tema', 'dark');
+      localStorage.removeItem('deolho-cartao');
+    } catch {}
+  });
   page.on('pageerror', (e) => console.log('  [erro na página]', e.message));
   return page;
 }
@@ -60,14 +69,14 @@ const semSeloDev = (page) => page.addStyleTag({ content: 'nextjs-portal{display:
 async function esperarMapa(page) {
   await semSeloDev(page);
   await page.waitForSelector('.maplibregl-canvas', { timeout: 30000 });
-  await page.waitForFunction(() => document.querySelectorAll('.pin').length > 0, { timeout: 30000 }).catch(() => console.log('  (sem .pin)'));
+  await page.waitForFunction(() => document.querySelectorAll('.pino').length > 0, { timeout: 30000 }).catch(() => console.log('  (sem .pino)'));
   await page.waitForNetworkIdle({ idleTime: 800, timeout: 30000 }).catch(() => {});
   await esperar(1500);
 }
 
 // Abre um post pelo link e segura o dedo na tela (o story pausa, como no app): sem isso ele passa sozinho em 6 s
 async function abrirStory(page, id) {
-  await page.goto(`${APP}/?post=${id}`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`${APP}/mapa?post=${id}`, { waitUntil: 'domcontentloaded' });
   await page.waitForSelector('[role="dialog"][aria-label="Post"] .story-face img[src]', { timeout: 30000 });
   await semSeloDev(page);
   const area = await page.$('[aria-label="Próximo story"]');
@@ -111,7 +120,7 @@ async function publicar(navegador, { nome, foto, categoria, legenda, rostos = 0,
     }
     req.continue();
   });
-  await page.goto(APP + '/', { waitUntil: 'domcontentloaded' });
+  await page.goto(APP + '/mapa', { waitUntil: 'domcontentloaded' });
   await esperarMapa(page);
   const [escolha] = await Promise.all([page.waitForFileChooser({ timeout: 15000 }), clicarTexto(page, 'Registrar')]);
   await escolha.accept([`${RAIZ}public/gerado/fotos/${foto}.jpg`]);
@@ -123,7 +132,7 @@ async function publicar(navegador, { nome, foto, categoria, legenda, rostos = 0,
   await esperar(600);
   await page.evaluate(() => document.activeElement?.blur());
   await esperar(200);
-  await marcar(page, `${nome}-folha`, { publicar: 'Publicar ·', foto: 'css:[role="dialog"] img[alt="Prévia da foto"]' });
+  await marcar(page, `${nome}-folha`, { publicar: 'Publicar ·', foto: 'css:[role="dialog"] img[alt="Prévia da foto"]', folha: 'css:[role="dialog"]' });
   await capturar(page, `${SAIDA}${nome}-folha.png`);
   await page.locator('[role="dialog"] ::-p-text(Publicar ·)').click();
   await page.waitForFunction(() => document.body.innerText.includes('Protegendo rostos e placas'), { timeout: 15000 });
@@ -142,6 +151,7 @@ async function publicar(navegador, { nome, foto, categoria, legenda, rostos = 0,
     });
     await page.waitForFunction(() => document.body.innerText.includes('tela de início'), { timeout: 15000 });
     await esperar(600);
+    await marcar(page, 'instalar', { cartao: 'css:footer ~ div .pointer-events-auto, .z-20 > .pointer-events-auto' });
     await capturar(page, `${SAIDA}instalar.png`);
   }
 }
@@ -149,8 +159,9 @@ async function publicar(navegador, { nome, foto, categoria, legenda, rostos = 0,
 const SECOES = {
   async mapa(navegador) {
     const page = await novaPagina(navegador);
-    await page.goto(APP + '/', { waitUntil: 'domcontentloaded' });
+    await page.goto(APP + '/mapa', { waitUntil: 'domcontentloaded' });
     await esperarMapa(page);
+    await marcar(page, 'mapa', { registrar: 'css:footer button.flex-1' });
     await capturar(page, SAIDA + 'mapa.png');
   },
   async story(navegador) {
@@ -187,19 +198,19 @@ const SECOES = {
   },
   async alertas(navegador) {
     const page = await novaPagina(navegador);
-    await page.goto(APP + '/', { waitUntil: 'domcontentloaded' });
+    await page.goto(APP + '/mapa', { waitUntil: 'domcontentloaded' });
     await esperarMapa(page);
     await page.click('[aria-label="Alertas perto de você"]');
     await page.waitForFunction(() => document.body.innerText.includes('Me avisa quando acontecer algo perto') || document.body.innerText.includes('Avisos perto de você'), { timeout: 15000 });
     await esperar(800);
-    await marcar(page, 'alertas', { ligar: 'Ligar alertas', raio: '1,0 km' });
+    await marcar(page, 'alertas', { ligar: 'Ligar alertas', raio: '1,0 km', folha: 'css:[role="dialog"]' });
     await capturar(page, SAIDA + 'alertas.png');
   },
   async comercio(navegador) {
     const page = await novaPagina(navegador, { onde: [seed.comercio.lat, seed.comercio.lng] });
-    await page.goto(APP + '/', { waitUntil: 'domcontentloaded' });
+    await page.goto(APP + '/mapa', { waitUntil: 'domcontentloaded' });
     await esperarMapa(page);
-    await page.click('[aria-label="Minha conta"]');
+    await page.click('[aria-label^="Minha conta"]');
     await page.waitForFunction(() => document.body.innerText.includes('Tem um estabelecimento?'), { timeout: 15000 });
     await esperar(500);
     if (process.env.DEPURAR) await capturar(page, SAIDA + 'depurar-conta.png');
@@ -214,18 +225,18 @@ const SECOES = {
     await esperar(600);
     await page.evaluate(() => document.activeElement?.blur());
     await esperar(200);
-    await marcar(page, 'comercio', { pedir: 'Pedir verificação' });
+    await marcar(page, 'comercio', { pedir: 'Pedir verificação', folha: 'css:[role="dialog"]' });
     await capturar(page, SAIDA + 'comercio.png');
   },
   async pergunta(navegador) {
     const page = await novaPagina(navegador);
-    await page.goto(APP + '/', { waitUntil: 'domcontentloaded' });
+    await page.goto(APP + '/mapa', { waitUntil: 'domcontentloaded' });
     await esperarMapa(page);
     await page.click('[aria-label="Perguntar: alguém aí?"]');
     await page.waitForSelector('textarea[placeholder^="Ex.: Como está a fila"]', { timeout: 15000 });
     await page.type('textarea[placeholder^="Ex.: Como está a fila"]', 'Como está a fila do posto?', { delay: 25 });
     await esperar(800);
-    await marcar(page, 'pergunta', { perguntar: 'Perguntar aqui' });
+    await marcar(page, 'pergunta', { perguntar: 'Perguntar aqui', cartao: 'css:footer .pointer-events-auto' });
     await capturar(page, SAIDA + 'pergunta.png');
   },
 };

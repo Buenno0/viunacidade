@@ -1,10 +1,10 @@
-// Cartão final: a borda tracejada da cidade vira a marca (o contorno real do município, com o pino cravado no
-// centro), o nome, a frase, o link e o QR. Créditos discretos embaixo.
+// Cartão final: o contorno tracejado vira a marca (o pino-olho do redesign "Noite"), o wordmark "viu", a frase, o
+// link e o QR. Créditos discretos embaixo.
 import React from 'react';
 import { AbsoluteFill } from 'remotion';
 import { Marca } from '../componentes/Marca';
 import { QR } from '../componentes/QR';
-import { ARCHIVO, MONO } from '../fontes';
+import { TITULO, MONO } from '../fontes';
 import { cl, outBack, outCubic } from '../miniatura/iso';
 import { COR } from '../tema';
 import { Cartela } from './comum';
@@ -19,12 +19,12 @@ export const Final: React.FC<{ t: number; vertical?: boolean }> = ({ t, vertical
     // 9:16: tudo centralizado e dentro da zona segura do Reels (sem nada nos 250 px de cima nem abaixo de 1490)
     return (
       <AbsoluteFill style={{ background: COR.bg }}>
-        <div style={{ position: 'absolute', left: 300, top: 290, width: 480, height: 420 }}>
-          <Marca largura={480} preenchimento={enche} pino={pino} tracejado={contorno * (1 - enche * 0.6)} />
+        <div style={{ position: 'absolute', left: 390, top: 290, width: 300, height: 360 }}>
+          <Marca largura={300} preenchimento={enche} pino={pino} tracejado={contorno * (1 - enche * 0.6)} />
         </div>
         <div style={{ position: 'absolute', left: 0, right: 0, top: 760, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-          <div style={{ fontFamily: ARCHIVO, fontWeight: 700, fontSize: 116, lineHeight: 1, letterSpacing: '-0.02em', color: COR.ink, ...resto(1.0) }}>Viu na Cidade</div>
-          <div style={{ fontFamily: MONO, fontWeight: 500, fontSize: 28, letterSpacing: '0.16em', textTransform: 'uppercase', color: COR.muted, marginTop: 20, ...resto(1.2) }}>Itapetininga · SP</div>
+          <div style={{ fontFamily: TITULO, fontWeight: 500, fontSize: 150, lineHeight: 0.9, letterSpacing: '-0.04em', color: COR.ink, ...resto(1.0) }}>viu</div>
+          <div style={{ fontFamily: MONO, fontWeight: 500, fontSize: 28, letterSpacing: '0.16em', textTransform: 'uppercase', color: COR.muted, marginTop: 20, ...resto(1.2) }}>na cidade · Itapetininga · SP</div>
           <div style={{ marginTop: 36 }}>
             <Cartela texto={"O que está rolando agora\nem Itapetininga."} t={t} de={1.5} tamanho={48} peso={600} style={{ textAlign: 'center' }} />
           </div>
@@ -44,18 +44,18 @@ export const Final: React.FC<{ t: number; vertical?: boolean }> = ({ t, vertical
   }
   return (
     <AbsoluteFill style={{ background: COR.bg }}>
-      <div style={{ position: 'absolute', left: 230, top: 290, width: 540, height: 473 }}>
-        <Marca largura={540} preenchimento={enche} pino={pino} tracejado={contorno * (1 - enche * 0.6)} />
+      <div style={{ position: 'absolute', left: 320, top: 270, width: 400, height: 480 }}>
+        <Marca largura={400} preenchimento={enche} pino={pino} tracejado={contorno * (1 - enche * 0.6)} />
         {halo > 0 && halo < 1 && (
           <div style={{
-            position: 'absolute', left: 540 * 0.58 - 30 - 10, top: 473 * ((27 - 8) / 84) - 30 - 10, width: 60, height: 60, borderRadius: 40,
+            position: 'absolute', left: 400 * 0.5 - 40 - 4, top: 480 * (46 / 120) - 40 - 4, width: 80, height: 80, borderRadius: 50,
             border: `4px solid ${COR.accent}`, transform: `scale(${(1 + 3 * halo).toFixed(3)})`, opacity: 0.9 * (1 - halo),
           }} />
         )}
       </div>
       <div style={{ position: 'absolute', left: 880, top: 300, width: 900 }}>
-        <div style={{ fontFamily: ARCHIVO, fontWeight: 700, fontSize: 132, lineHeight: 1, letterSpacing: '-0.02em', color: COR.ink, ...resto(1.0) }}>Viu na Cidade</div>
-        <div style={{ fontFamily: MONO, fontWeight: 500, fontSize: 30, letterSpacing: '0.16em', textTransform: 'uppercase', color: COR.muted, marginTop: 22, ...resto(1.2) }}>Itapetininga · SP</div>
+        <div style={{ fontFamily: TITULO, fontWeight: 500, fontSize: 176, lineHeight: 0.9, letterSpacing: '-0.04em', color: COR.ink, ...resto(1.0) }}>viu</div>
+        <div style={{ fontFamily: MONO, fontWeight: 500, fontSize: 30, letterSpacing: '0.16em', textTransform: 'uppercase', color: COR.muted, marginTop: 22, ...resto(1.2) }}>na cidade · Itapetininga · SP</div>
         <div style={{ marginTop: 44 }}>
           <Cartela texto={"O que está rolando agora\nem Itapetininga."} t={t} de={1.5} tamanho={50} peso={600} />
         </div>

@@ -6,7 +6,8 @@ import { recordInteraction } from "@/lib/interactions";
 import { CATEGORIES, severityVar } from "@/lib/categories";
 import { photoUrl } from "@/lib/media";
 import { levelName } from "@/lib/progress";
-import { coresDoCeu, horaDaCidade, noiteEm, relogio } from "@/lib/ceu";
+import { horaDaCidade, relogio } from "@/lib/ceu";
+import CeuDoPost from "./viewer/CeuDoPost";
 import { distance, formatDistance, isFresh, timeAgo, type PostFeature } from "@/lib/posts";
 import { CategoryIcon, ChevronIcon, CloseIcon, FlagIcon, PinIcon } from "./ui/icons";
 import { Tag } from "./ui/Tag";
@@ -34,33 +35,6 @@ type Props = {
 const whenFmt = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" });
 const STORY_MS = 6000;
 const registered = (iso: string) => whenFmt.format(new Date(iso)).replace(",", " às");
-
-// O céu da hora em que a foto foi tirada (V3 do canvas): um recorte do céu
-// da LP naquela hora, com o sol ou a lua, ao lado do horário
-function CeuDoPost({ iso }: { iso: string }) {
-  const h = horaDaCidade(new Date(iso));
-  const [c0, c1, c2, c3] = coresDoCeu(h);
-  const noite = noiteEm(h) > 0.5;
-  const t = noite ? ((h + 24 - 19) % 24) / 10.5 : (h - 5.5) / 13.5;
-  const x = 6 + 26 * Math.min(1, Math.max(0, t));
-  const id = `ceu-${iso.replace(/\W/g, "")}`;
-  return (
-    <svg viewBox="0 0 40 24" width="40" height="24" className="shrink-0 overflow-hidden rounded-md" aria-hidden="true">
-      <defs>
-        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor={c0} />
-          <stop offset="0.45" stopColor={c1} />
-          <stop offset="0.8" stopColor={c2} />
-          <stop offset="1" stopColor={c3} />
-        </linearGradient>
-      </defs>
-      <rect width="40" height="24" fill={`url(#${id})`} />
-      <circle cx={x} cy="13" r="4.5" fill={noite ? "#f6f1dc" : "#fff6d8"} />
-      {noite && <circle cx={x - 2} cy="11.5" r="4" fill={c1} />}
-      <path d="M0 24V19h5v-3h6v3h4v-5h5v5h5v-2h6v2h4v-4h5v9z" fill="#0a1638" />
-    </svg>
-  );
-}
 
 // Tela cheia sobre a foto: sala-escura, porque a foto manda na luz.
 // Um carrossel com scroll-snap nativo: arrastar no celular, setas no teclado.
@@ -399,7 +373,7 @@ export default function PostViewer({ posts, startId, userPos, loggedIn, onActive
                   </>
                 ) : (
                   <span className="flex items-center gap-2">
-                    <CeuDoPost iso={p.created_at} />
+                    <CeuDoPost hora={horaDaCidade(new Date(p.created_at))} />
                     <span>
                       <span className="num text-ink">{relogio(new Date(p.created_at))}</span> · {timeAgo(p.created_at, now)}
                     </span>

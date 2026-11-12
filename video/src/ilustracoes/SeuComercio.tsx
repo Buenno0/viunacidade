@@ -1,7 +1,7 @@
 // "Seu Comércio": o café de exemplo da Divulgação (nome genérico, nunca um comércio real). Fachada com toldo
 // listrado, vitrine acesa, mesinha na calçada com vapor subindo.
 import React from 'react';
-import { ARCHIVO } from '../fontes';
+import { TITULO } from '../fontes';
 import { CENA, COR } from '../tema';
 import { Faixas, Pessoa, deriva, onda, pisca } from './comum';
 
@@ -17,7 +17,7 @@ export const SeuComercio: React.FC<{ t: number }> = ({ t }) => {
       <rect x={20} y={96} width={260} height={238} fill="#b5523a" />
       <rect x={20} y={96} width={260} height={8} fill="#c66447" />
       <rect x={52} y={106} width={196} height={40} rx={4} fill={COR.accent} />
-      <text x={150} y={134} textAnchor="middle" fill={COR.accentInk} fontFamily={ARCHIVO} fontWeight={700} fontSize={21} letterSpacing="0.06em">SEU COMÉRCIO</text>
+      <text x={150} y={134} textAnchor="middle" fill={COR.accentInk} fontFamily={TITULO} fontWeight={700} fontSize={21} letterSpacing="0.06em">SEU COMÉRCIO</text>
       {Array.from({ length: 8 }, (_, k) => (
         <polygon key={k} points={`${20 + k * 32.5},158 ${52.5 + k * 32.5},158 ${58 + k * 33.5},196 ${16 + k * 33.5},196`} fill={k % 2 ? COR.ink : COR.danger} />
       ))}

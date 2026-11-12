@@ -71,6 +71,8 @@ type Tab = "mapa" | "trends" | "historico";
 
 type Toast = { text: string; postId?: string };
 
+const CARTAO_KEY = "deolho-cartao";
+
 async function fetchActivePosts(): Promise<PostFeature[]> {
   const { data, error } = await getSupabase().rpc("active_posts", { p_city_id: CITY.id });
   if (error) throw error;
@@ -112,6 +114,28 @@ export default function Home() {
   const [alertaAberto, setAlertaAberto] = useState<CityAlert | null>(null);
   // altura medida do céu (px): o que fica embaixo dele se posiciona por ela
   const [alturaTopo, setAlturaTopo] = useState(180);
+  // O cartão de baixo encolhe para só os botões (a alça no topo dele): no
+  // celular ele toma ~20% da tela. A escolha fica guardada no aparelho.
+  const [encolhido, setEncolhido] = useState(false);
+  useEffect(() => {
+    let salvo = false;
+    try {
+      salvo = localStorage.getItem(CARTAO_KEY) === "encolhido";
+    } catch {
+      // sem armazenamento: começa aberto
+    }
+    if (salvo) Promise.resolve().then(() => setEncolhido(true));
+  }, []);
+  const alternaCartao = () =>
+    setEncolhido((v) => {
+      try {
+        if (v) localStorage.removeItem(CARTAO_KEY);
+        else localStorage.setItem(CARTAO_KEY, "encolhido");
+      } catch {
+        // sem armazenamento: vale só nesta visita
+      }
+      return !v;
+    });
   const [tab, setTab] = useState<Tab>(params.get("historico") ? "historico" : "mapa");
   const [today] = useState(() => cityDay(new Date()));
   const [historyCounts, setHistoryCounts] = useState<Record<string, number> | null>(null);
@@ -833,13 +857,27 @@ export default function Home() {
         <footer className="pointer-events-none absolute inset-x-0 bottom-0 z-10 px-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <div
             className={cx(
-              "pointer-events-auto mx-auto flex max-w-lg flex-col gap-3 rounded-[26px] border p-3 pt-3",
+              "pointer-events-auto mx-auto flex max-w-lg flex-col gap-3 rounded-[26px] border p-3",
+              !inHistory && "pt-1.5",
               inHistory
                 ? "sala-escura border-[#2e3f7a] bg-[#111b40] text-ink shadow-[0_-10px_40px_rgba(2,6,24,0.5)]"
                 : "light border-line bg-surface text-ink shadow-[0_-10px_40px_rgba(2,6,24,0.35)]",
             )}
           >
+            {/* a alça: encolhe o cartão para só os botões, e abre de novo */}
+            {!inHistory && (
+              <button
+                type="button"
+                onClick={alternaCartao}
+                aria-expanded={!encolhido}
+                aria-label={encolhido ? "Mostrar abas e posts ao vivo" : "Encolher o cartão"}
+                className="-mb-1.5 flex h-6 w-full items-center justify-center"
+              >
+                <span className="h-1 w-10 rounded-full bg-line transition-colors hover:bg-muted" />
+              </button>
+            )}
             {/* Mapa | Trends | Histórico: embaixo, onde o polegar alcança (T1) */}
+            {(inHistory || !encolhido) && (
             <div role="tablist" aria-label="Seções" className={cx("grid grid-cols-3 gap-0.5 rounded-full p-1", inHistory ? "bg-[#0a1230]" : "bg-elev")}>
               {(
                 [
@@ -866,6 +904,7 @@ export default function Home() {
                 </button>
               ))}
             </div>
+            )}
 
             {inHistory ? (
               <>
@@ -885,7 +924,7 @@ export default function Home() {
               </>
             ) : (
               <>
-                {tab === "mapa" && <LiveStrip posts={ready.slice(0, 20)} seen={seen} onOpen={(id) => openViewer(id)} />}
+                {tab === "mapa" && !encolhido && <LiveStrip posts={ready.slice(0, 20)} seen={seen} onOpen={(id) => openViewer(id)} />}
                 <div className="flex gap-2">
                   <button
                     onClick={startAsk}

@@ -420,7 +420,18 @@
   animation: lp-flutua 7s ease-in-out var(--d, 0s) infinite alternate, lp-surge 1s var(--out) var(--d, 0s) both; }
 @keyframes lp-flutua { from { translate: 0 0; } to { translate: 0 -12px; } }
 @keyframes lp-surge { from { opacity: 0; filter: blur(8px); } to { opacity: 1; filter: none; } }
-.lp-ceu-aviso-casca { left: 0; top: 6px; z-index: 3; width: 300px; background: transparent; box-shadow: none; }
+.lp-ceu-aviso-casca { left: 0; top: 6px; z-index: 3; width: 372px; max-width: 100%; background: transparent; box-shadow: none; }
+/* a pílula do topo do app (CeuDoApp, P2): escura, com o contorno da luz e halo */
+.lp-ceu-pilula { display: flex; align-items: center; gap: 10px; height: 60px; padding: 0 8px 0 16px; border-radius: 999px; color: #fff;
+  background: linear-gradient(180deg, #23336e, #0f1a44); border: 1.5px solid rgba(255, 210, 122, 0.6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 0 0 5px rgba(255, 210, 122, 0.16), 0 0 28px rgba(255, 210, 122, 0.14), 0 24px 50px rgba(4, 8, 26, 0.5);
+  animation: lp-cai-aviso 0.7s var(--spring) both; }
+.lp-ceu-pilula-viu { font: 500 22px/1 var(--font-cartaz); letter-spacing: -0.03em; }
+.lp-ceu-pulso { display: flex; min-width: 0; flex: 1; align-items: center; gap: 9px; animation: lp-pulso-entra 0.45s var(--out) both; }
+@keyframes lp-pulso-entra { from { opacity: 0; translate: 0 6px; } }
+.lp-ceu-pilula-sino, .lp-ceu-pilula-conta { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border-radius: 50%; }
+.lp-ceu-pilula-sino { background: rgba(255, 255, 255, 0.1); }
+.lp-ceu-pilula-conta { background: var(--luz); }
 .lp-ceu-aviso { display: flex; gap: 10px; align-items: center; padding: 11px 14px; border-radius: 16px; background: rgba(255, 255, 255, 0.96); box-shadow: 0 24px 50px rgba(4, 8, 26, 0.4);
   animation: lp-cai-aviso 0.7s var(--spring) both; }
 @keyframes lp-cai-aviso { from { opacity: 0; translate: 0 -46px; scale: 0.94; } }
@@ -436,7 +447,9 @@
 .lp-ceu-sim:focus-visible, .lp-ceu-nao:focus-visible { outline: 2px solid #2f56b8; outline-offset: 2px; }
 .lp-ceu-tenta { position: absolute; right: 10px; bottom: -30px; padding: 4px 10px; border-radius: 999px; background: var(--luz); color: #0a1230; font-size: 12px; font-weight: 700; white-space: nowrap; animation: lp-dica 3.5s ease-in-out infinite; }
 .lp-ceu-tenta::before { content: ""; position: absolute; right: 22px; top: -5px; border: 6px solid transparent; border-bottom-color: var(--luz); border-top: 0; }
-.lp-ceu-nivel { right: 0; top: 572px; z-index: 3; width: 240px; display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 18px; }
+.lp-ceu-nivel { right: 0; top: 572px; z-index: 3; width: 268px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 18px; }
+.lp-xp-anel { animation: lp-xp-anel 1.6s var(--out) 1.4s both; }
+@keyframes lp-xp-anel { from { stroke-dasharray: 3 100; } }
 .lp-ceu-post .lp-ceu-espia { position: absolute; z-index: 2; top: 0; right: 30px; translate: 0 -91%; }
 /* "alguém está postando": três pontinhos, como no chat */
 .lp-digitando { display: flex; align-items: center; gap: 10px; min-height: 52px; }
@@ -458,7 +471,9 @@
 @media (max-width: 720px) {
   .lp-ceu-cards { min-height: 0; display: flex; flex-direction: column; gap: 14px; padding-bottom: 20px; }
   .lp-flutua { position: relative; left: auto; right: auto; top: auto; width: 100%; }
-  .lp-ceu-nivel { align-self: flex-end; width: 240px; }
+  .lp-ceu-nivel { align-self: flex-end; width: 268px; }
+  /* o Olheiro que espia empoleira no post, no vão abaixo da pílula */
+  .lp-ceu-post { margin-top: 48px; }
   .lp-ceu-telhado { gap: 12px; bottom: 14px; }
 }
 
@@ -514,7 +529,7 @@
 .lp-pausado *, .lp-pausado *::before, .lp-pausado *::after { animation-play-state: paused !important; }
 @media (prefers-reduced-motion: reduce) {
   .lp *, .lp *::before, .lp *::after { animation: none !important; transition: none !important; }
-  .lp-w, .lp-fade, .lp-anim .lp-rv, .lp-anim .lp-rvg > *, .lp-flutua, .lp-ceu-aviso, .lp-msg-entra { opacity: 1 !important; transform: none !important; translate: none !important; filter: none !important; }
+  .lp-w, .lp-fade, .lp-anim .lp-rv, .lp-anim .lp-rvg > *, .lp-flutua, .lp-ceu-aviso, .lp-ceu-pilula, .lp-ceu-pulso, .lp-msg-entra { opacity: 1 !important; transform: none !important; translate: none !important; filter: none !important; }
   .lp-tilt { transform: none !important; }
   .lp-tilt::after, .lp-voador { display: none; }
   .lp-cai, .lp-chao, .lp-nasce, .lp-pinsobe { opacity: 1 !important; transform: none !important; }

@@ -25,9 +25,9 @@ function carro(id: string, x0: number, y0: number, x1: number, y1: number, dir: 
       <polygon points={pts([iso(x0, y1, zt), iso(x1, y1, zt), iso(x1, y1, z0), iso(x0, y1, z0)])} fill={C[1]} />
       <polygon points={pts([iso(x1, y0, zt), iso(x1, y1, zt), iso(x1, y1, z0), iso(x1, y0, z0)])} fill={C[2]} />
       <polygon points={pts([iso(x0, y0, zt), iso(x1, y0, zt), iso(x1, y1, zt), iso(x0, y1, zt)])} fill={C[0]} />
-      <polygon points={pts([iso(a0, b1, zt + 3), iso(a1, b1, zt + 3), iso(a1, b1, zt), iso(a0, b1, zt)])} fill="#232830" />
-      <polygon points={pts([iso(a1, b0, zt + 3), iso(a1, b1, zt + 3), iso(a1, b1, zt), iso(a1, b0, zt)])} fill="#1b1f26" />
-      <polygon points={pts([iso(a0, b0, zt + 3), iso(a1, b0, zt + 3), iso(a1, b1, zt + 3), iso(a0, b1, zt + 3)])} fill="#3a4250" />
+      <polygon points={pts([iso(a0, b1, zt + 3), iso(a1, b1, zt + 3), iso(a1, b1, zt), iso(a0, b1, zt)])} fill="#1a2756" />
+      <polygon points={pts([iso(a1, b0, zt + 3), iso(a1, b1, zt + 3), iso(a1, b1, zt), iso(a1, b0, zt)])} fill="#121d4a" />
+      <polygon points={pts([iso(a0, b0, zt + 3), iso(a1, b0, zt + 3), iso(a1, b1, zt + 3), iso(a0, b1, zt + 3)])} fill="#2e3f7a" />
       <circle cx={l1[0].toFixed(1)} cy={l1[1].toFixed(1)} r={1.3} fill={luz} />
       <circle cx={l2[0].toFixed(1)} cy={l2[1].toFixed(1)} r={1.3} fill={luz} />
     </g>
@@ -117,9 +117,9 @@ export const Miniatura: React.FC<PropsMiniatura> = ({ t, chuva = 0, acesa = 1, n
           )}
         </g>
         <line x1={topo[0]} y1={topo[1]} x2={ponta[0]} y2={ponta[1]} stroke={COR.warn} strokeWidth={2.2} strokeLinecap="round" />
-        <line x1={topo[0]} y1={topo[1]} x2={contra[0]} y2={contra[1]} stroke="#c08f3a" strokeWidth={2.2} strokeLinecap="round" />
-        <rect x={contra[0] - 4} y={contra[1] - 1} width={8} height={6} fill="#6b7380" />
-        <line x1={gancho[0]} y1={gancho[1]} x2={carga[0]} y2={carga[1]} stroke="#cfc6b8" strokeWidth={0.8} />
+        <line x1={topo[0]} y1={topo[1]} x2={contra[0]} y2={contra[1]} stroke="#e0a225" strokeWidth={2.2} strokeLinecap="round" />
+        <rect x={contra[0] - 4} y={contra[1] - 1} width={8} height={6} fill="#4a5f9e" />
+        <line x1={gancho[0]} y1={gancho[1]} x2={carga[0]} y2={carga[1]} stroke="#c4cce8" strokeWidth={0.8} />
         <rect x={carga[0] - 4.5} y={carga[1]} width={9} height={6} fill={COR.muted} />
         <circle cx={topo[0]} cy={topo[1] - 3} r={2.2} fill={COR.danger} opacity={t % 2 < 1 ? 1 : 0.25} />
         {CIDADE.fios.map(desenhar)}

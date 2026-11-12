@@ -69,10 +69,10 @@ const pose = (a: Aparicao, t: number, vertical: boolean) => {
 
 // ── O polegar ───────────────────────────────────────────────────────────────────────────────────────────────────
 // Cada toque: o polegar sai do repouso (na borda), vai até o ponto, aperta (o botão afunda) e volta. O ponto fica à
-// direita do texto do botão, para não cobri-lo.
+// direita do texto do botão, para não cobri-lo: sai da caixa medida na captura (posicoes.json); `ponto` é a reserva.
 type Toque = { t: number; ponto: P; caixa: (p: Posicoes) => Caixa | undefined; confirma?: boolean };
 const TOQUES: Toque[] = [
-  { t: T.toqueRegistrar, ponto: [335, 804], caixa: () => ({ x: 86, y: 780, w: 288, h: 48 }) },
+  { t: T.toqueRegistrar, ponto: [320, 793], caixa: (p) => p.mapa?.registrar ?? { x: 172, y: 767, w: 195, h: 52 } },
   { t: T.toquePublicar, ponto: [335, 803], caixa: (p) => p['registrar-folha']?.publicar },
   { t: T.toqueRolando, ponto: [200, 735], caixa: (p) => p.story?.rolando, confirma: true },
   { t: T.toquePerguntar, ponto: [330, 792], caixa: (p) => p.pergunta?.perguntar },
@@ -81,11 +81,17 @@ const TOQUES: Toque[] = [
 ];
 const apertoNo = (q: Toque, t: number) => cl((t - (q.t - 0.03)) / 0.05) * (1 - cl((t - (q.t + 0.1)) / 0.06));
 
-const polegar = (m: Medidas, a: Aparicao, t: number) => {
+const pontoDo = (q: Toque, pos: Posicoes | undefined): P => {
+  const c = pos ? q.caixa(pos) : undefined;
+  return c ? [c.x + c.w * 0.82, c.y + c.h * 0.56] : q.ponto;
+};
+
+const polegar = (m: Medidas, a: Aparicao, t: number, pos?: Posicoes) => {
   const repouso = pontaEmRepouso(m);
   const q = TOQUES.find((x) => x.t >= a.de && x.t < a.ate && t > x.t - 0.4 && t < x.t + 0.6);
   if (!q) return { ponta: repouso, aperto: 0 };
-  const alvo = naTela(m, q.ponto[0], q.ponto[1]);
+  const [px, py] = pontoDo(q, pos);
+  const alvo = naTela(m, px, py);
   const f = inOut(cl((t - (q.t - 0.38)) / 0.32)) * (1 - inOut(cl((t - (q.t + 0.16)) / 0.4)));
   const ponta: P = [repouso[0] + (alvo[0] - repouso[0]) * f, repouso[1] + (alvo[1] - repouso[1]) * f];
   return { ponta, aperto: apertoNo(q, t), onda: { ponto: alvo, p: cl((t - q.t) / 0.5) } };
@@ -108,7 +114,7 @@ const Folha: React.FC<{ t: number; captura: string; topo: number; sobe: number; 
   return (
     <>
       <div style={{ position: 'absolute', inset: 0, background: '#000', opacity: 0.55 * s }} />
-      <div style={{ position: 'absolute', left: 0, top: topo + (1 - s) * (h + 12), width: TELA.largura, height: h, borderRadius: '16px 16px 0 0', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', left: 0, top: topo + (1 - s) * (h + 12), width: TELA.largura, height: h, borderRadius: '26px 26px 0 0', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', left: 0, top: -topo, width: TELA.largura, height: TELA.altura }}>
           <Captura nome={captura} />
           {children}
@@ -152,7 +158,7 @@ const Registrar: React.FC<{ t: number; pos: Posicoes }> = ({ t, pos }) => {
     <>
       <Captura nome="mapa" />
       {noAr > 0 && <Captura nome="registrar-no-ar" style={{ opacity: noAr }} />}
-      <Folha t={t} captura="registrar-folha" topo={361} sobe={T.folha} desce={T.voo[0]}>
+      <Folha t={t} captura="registrar-folha" topo={pos['registrar-folha']?.folha?.y ?? 355} sobe={T.folha} desce={T.voo[0]}>
         {t >= T.voo[0] && (
           <div style={{ position: 'absolute', left: f.x, top: f.y, width: f.w, height: f.h, borderRadius: 10, background: COR.surface, border: `1.5px dashed ${COR.line}`, boxSizing: 'border-box' }} />
         )}
@@ -164,9 +170,9 @@ const Registrar: React.FC<{ t: number; pos: Posicoes }> = ({ t, pos }) => {
 const CARTAO_PERGUNTA: Caixa = { x: 16, y: 601, w: 358, h: 234 };
 // "Alguém aí?": o modo de pergunta esconde os filtros e a barra de baixo (a captura entra por cima do mapa, com um
 // buraco onde o cartão vai ficar) e o cartão sobe; depois do toque, tudo volta e o pedido fica no mapa
-const Pergunta: React.FC<{ t: number }> = ({ t }) => {
+const Pergunta: React.FC<{ t: number; pos: Posicoes }> = ({ t, pos }) => {
   const s = sobeDesce(t, T.perguntaSobe, T.perguntaDesce);
-  const c = CARTAO_PERGUNTA;
+  const c = pos.pergunta?.cartao ?? CARTAO_PERGUNTA;
   return (
     <>
       <Captura nome="mapa" />
@@ -176,24 +182,24 @@ const Pergunta: React.FC<{ t: number }> = ({ t }) => {
   );
 };
 
-const Alertas: React.FC<{ t: number }> = ({ t }) => (
+const Alertas: React.FC<{ t: number; pos: Posicoes }> = ({ t, pos }) => (
   <>
     <Captura nome="mapa" />
-    <Folha t={t} captura="alertas" topo={288} sobe={T.alertasSobe} desce={T.alertasDesce} />
+    <Folha t={t} captura="alertas" topo={pos.alertas?.folha?.y ?? 280} sobe={T.alertasSobe} desce={T.alertasDesce} />
   </>
 );
 
-const Comercio: React.FC<{ t: number }> = ({ t }) => (
+const Comercio: React.FC<{ t: number; pos: Posicoes }> = ({ t, pos }) => (
   <>
     <Captura nome="mapa" />
-    <Folha t={t} captura="comercio" topo={216} sobe={T.comercioSobe} />
+    <Folha t={t} captura="comercio" topo={pos.comercio?.folha?.y ?? 206} sobe={T.comercioSobe} />
   </>
 );
 
 const CARTAO_INSTALAR: Caixa = { x: 16, y: 682, w: 358, h: 146 };
 // O aviso de instalar sobe sobre a barra de baixo (que vem da captura do mapa no mesmo lugar)
-const Instalar: React.FC<{ t: number }> = ({ t }) => {
-  const c = CARTAO_INSTALAR;
+const Instalar: React.FC<{ t: number; pos: Posicoes }> = ({ t, pos }) => {
+  const c = pos.instalar?.cartao ?? CARTAO_INSTALAR;
   return (
     <>
       <Captura nome="instalar" />
@@ -235,9 +241,9 @@ const Notificacao: React.FC<{ t: number }> = ({ t }) => {
   if (a <= 0 || sai >= 1) return null;
   const y = -120 + 132 * outBack(a) - 140 * sai * sai;
   return (
-    <div style={{ position: 'absolute', left: 10, right: 10, top: y, borderRadius: 18, background: '#211c15', border: `1px solid ${COR.line}`, padding: '12px 14px', display: 'flex', gap: 12, alignItems: 'center', fontFamily: 'system-ui, -apple-system, sans-serif', color: COR.ink }}>
-      <div style={{ width: 38, height: 38, borderRadius: 10, background: COR.bg, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-        <Marca largura={30} />
+    <div style={{ position: 'absolute', left: 10, right: 10, top: y, borderRadius: 18, background: COR.elev, border: `1px solid ${COR.line}`, padding: '12px 14px', display: 'flex', gap: 12, alignItems: 'center', fontFamily: 'system-ui, -apple-system, sans-serif', color: COR.ink }}>
+      <div style={{ width: 38, height: 38, borderRadius: 10, background: 'linear-gradient(#0d1a48, #1d3f99)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+        <Marca largura={22} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: COR.muted }}><span>Viu na Cidade</span><span>agora</span></div>
@@ -333,7 +339,7 @@ export const Telefone: React.FC<{ t: number; alturaQuadro: number; posicoes: Pos
       {lista(vertical).map((a, i) => {
         const p = pose(a, t, vertical);
         if (!p) return null;
-        const dedo = polegar(m, a, t);
+        const dedo = polegar(m, a, t, posicoes);
         const topo = (vertical ? TOPO_V : TOPO) + p.dy + 3 * dedo.aperto;
         return (
           <div key={i} style={{ position: 'absolute', left: p.x - m.L / 2, top: topo, width: m.L, height: m.A, transform: `rotate(${p.giro.toFixed(3)}deg)` }}>

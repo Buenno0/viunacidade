@@ -22,21 +22,20 @@
   - Explicativo: cerca de 50 s, sem narração (texto na tela, música e efeitos), em 16:9 e 9:16. Na vertical, nada
     importante nos ~250 px do topo, abaixo de ~1490 px nem na coluna da direita.
   - Narrado (opcional): o explicativo em 9:16 com voz, para redes.
-- **Marca:** "Viu na Cidade" (curto: "Viu").
-  - A marca é o contorno do município em ouro com o pino recortado (`components/ui/Mark.tsx`, `CITY_PATH` e
-    `PIN_PATH`).
-  - O wordmark é "Viu na Cidade" em Archivo 700, com o rótulo mono "ITAPETININGA · SP".
+- **Marca:** "Viu na Cidade" (curto: "Viu"). Redesign "Noite" de 11/11/2026.
+  - A marca é o Pino-olho: o pin do mapa com um olho, e o anel em volta da pupila é o tempo que esvazia
+    (`design/marca.mjs` no app, `src/componentes/Marca.tsx` aqui).
+  - O wordmark é "viu" em Outfit 500, com o rótulo mono "NA CIDADE · ITAPETININGA · SP". Corpo em Manrope.
   - Cartão final: viunacidade.com.br, com QR code. O nome antigo não aparece.
-- **Paleta:** a fonte da verdade é `design/tokens.mjs`.
-  - Interface: basalto #0c0a08 · superfície #16130f · elevado #211c15 · linha #40372b · tinta #f4efe4 · apagado
-    #a99a84 · ouro gasto #d29a44, com texto #1a1206 por cima.
-  - Anel dos pinos: perigo #e08163, atenção #dca84a, ouro para evento e "outro".
+- **Paleta:** a fonte da verdade é `design/tokens.mjs` (tema escuro, a cidade vista de noite).
+  - Interface: noite #0a1230 · superfície #111b40 · elevado #1a2756 · linha #2e3f7a · tinta #f3f5ff · apagado
+    #a9b3d9 · luz da janela #ffd27a, com a tinta da noite #0a1230 por cima.
+  - Corpo dos pinos: perigo #ff6b6b, atenção #ffc35c, branco para evento e "outro"; o anel do tempo é a tinta da noite.
   - Azulejo dos marcos: #3563d9.
-  - Ilustrações, na mesma família: céu #1d2a44 e #141a33, água #0e2a3f e #8fb0f5, luz quente #ffd98a e #f2c879,
-    telha #9d5a26, pedra #d8ccb4.
-  - Sem sombra.
+  - A cidade em miniatura usa a paleta das cenas isométricas da LP (`components/landing/iso.tsx`): prédios azuis da
+    noite, lavanda de luar, coral, teal, telhado lilás e janelas da luz.
 - **Direção visual "B + 1":**
-  - O palco é uma cidade em miniatura isométrica, à noite, cercada pela borda tracejada dourada do app.
+  - O palco é uma cidade em miniatura isométrica, à noite, cercada pela borda tracejada da luz.
   - As "fotos" são ilustrações planas em camadas.
   - Os passos de uso aparecem no celular, com as telas reais, **na mão de alguém da cidade** (direção A, escolhida em
     07/10/2026 entre quatro, no canvas "Celular do vídeo" do Claude Design):
@@ -123,14 +122,15 @@
   - "Alguém aí?" com bolha tracejada e ondas no chão;
   - o post que acaba some com "puf".
 - **Do celular para a cidade:** quando alguém publica, o pino sai da tela do celular e pousa na miniatura.
-- **Gancho:** bolhas cinza genéricas, sem marca de app de mensagem → "OUVIU?" → o "OU" cai → "VIU." em ouro → a cidade
+- **Gancho:** bolhas genéricas, sem marca de app de mensagem → "OUVIU?" → o "OU" cai → "VIU." na luz → a cidade
   acende.
-- **Fecho:** a câmera sobe, a borda tracejada vira o contorno do município, e o pino pousa no recorte.
+- **Fecho:** o contorno tracejado vira o Pino-olho, que enche de luz e abre o olho.
 - **Transição de marca:** a troca de tema em círculo.
 - **Tipografia:**
-  - Archivo 700 e 600, nunca 800–900, com tracking −1,5% nos títulos grandes.
+  - Outfit nos títulos (500 a 700, apertada nos grandes), Manrope no corpo.
   - JetBrains Mono 500 em rótulos e números, em caixa alta, com tracking .16em.
-  - Fontes locais de `app/fonts/`. Ícones do app.
+  - A mono vem de `app/fonts/`; Outfit e Manrope dos pacotes @fontsource-variable (o app as serve pelo next/font).
+    Ícones do app.
 - **Para a web:**
   - Cartela com pelo menos 7% da altura do quadro; nada abaixo de 32 px em 1080p; peso 500 ou mais.
   - Margem de 5%.
@@ -173,7 +173,7 @@
 | # | Tempo | Cartela | Cena |
 | --- | --- | --- | --- |
 | 1 | 0–5 s | "ouvi dizer que alagou a avenida…" · "alguém sabe se tem show hoje?" · "essa foto é de hoje?" | Bolhas cinza pipocam sobre a miniatura apagada; uma traz uma foto com "?" |
-| 2 | 5–8 s | OUVIU? → VIU. | O "OU" cai; "VIU." acende em ouro; janelas acendem e as primeiras fotos pousam |
+| 2 | 5–8 s | OUVIU? → VIU. | O "OU" cai; "VIU." acende na luz; janelas acendem e as primeiras fotos pousam |
 | 3 | 8–10 s | O que está rolando agora em Itapetininga. | A câmera desliza pela cidade viva |
 | 4 | 10–15 s | Tire uma foto. · Ela aparece onde foi tirada. | Celular: Registrar → câmera → "O que é" → "Publicar · some em 2h"; o pino sai da tela e pousa com halo |
 | 5 | 15–20 s | Só vale foto de agora. · E some em até 12 h. | Anéis esvaziando; rótulos 2 h · 6 h · 12 h; um pino some com "puf" |

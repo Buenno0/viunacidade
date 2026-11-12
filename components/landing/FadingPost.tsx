@@ -6,8 +6,9 @@ import { clock, lpPaused, reducedMotion } from "./time";
 import { useT } from "./lang";
 
 // Um post que nasce e some na frente da pessoa: a ideia do app em 12 segundos.
-// A contagem só começa quando o card aparece na tela (senão ninguém vê o fim);
-// nos últimos segundos o relógio fica vermelho e o card treme, e aí some.
+// A contagem só começa quando o card aparece na tela (senão ninguém vê o fim).
+// O tempo é o anel do app (o mesmo do pino-olho no mapa): esvazia em volta do
+// olho; nos últimos segundos fica vermelho, o card treme, e aí some.
 const LIFE = 12;
 const URGENT = 3;
 
@@ -79,8 +80,27 @@ export default function FadingPost() {
         <div className="relative" style={{ height: 120 }}>
           <EventScene className="lp-cena absolute inset-0" vb="80 60 280 200" />
           <span className="lp-tag font-semibold" style={{ top: 10, left: 10, color: "var(--accent)", border: "1px solid var(--accent)" }}>{t.cat}</span>
-          <span className={`lp-tag lp-num ${left <= URGENT ? "lp-relogio-urgente" : ""}`} style={{ top: 10, right: 10 }}>{clock(Math.ceil(left))}</span>
-          <span className="absolute bottom-0 left-0" style={{ height: 3, width: `${(left / LIFE) * 100}%`, background: left <= URGENT ? "var(--danger)" : "var(--accent)", transition: "width .1s linear, background .3s" }} />
+          <span className={`lp-tag lp-num flex items-center gap-1.5 ${left <= URGENT ? "lp-relogio-urgente" : ""}`} style={{ top: 10, right: 10, paddingLeft: 5 }}>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" fill="#ffffff" />
+              <circle cx="12" cy="12" r="7" fill="none" stroke="#0a1230" strokeOpacity="0.15" strokeWidth="2.6" />
+              <circle
+                cx="12"
+                cy="12"
+                r="7"
+                fill="none"
+                stroke={left <= URGENT ? "#e5484d" : "#0a1230"}
+                strokeWidth="2.6"
+                pathLength={100}
+                strokeDasharray={`${Math.max(0.5, (left / LIFE) * 100)} 100`}
+                strokeLinecap="round"
+                transform="rotate(-90 12 12)"
+                style={{ transition: "stroke-dasharray .1s linear, stroke .3s" }}
+              />
+              <circle cx="12" cy="12" r="3.2" fill="#0a1230" />
+            </svg>
+            {clock(Math.ceil(left))}
+          </span>
         </div>
         <div className="flex flex-col gap-1 px-3.5 py-3">
           <span className="text-sm">{t.caption}</span>

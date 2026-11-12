@@ -1,16 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { severityVar } from "@/lib/categories";
+import Mark from "@/components/ui/Mark";
+import { BellIcon, CategoryIcon } from "@/components/ui/icons";
+import Olheiro, { NIVEL_COR } from "./Olheiro";
 import OlheiroVivo from "./OlheiroVivo";
-import { NIVEL_COR } from "./Olheiro";
 import { useT } from "./lang";
 import { lpPaused, reducedMotion } from "./time";
 
 // O herói da direção "Noite": as peças de verdade do app flutuando sobre o céu,
-// chegando como numa conversa (referência: agentes.chat). O aviso cai do alto
-// e troca a cada ~9 s; o post aparece depois de "alguém está postando"; por
-// fim vem a pergunta "Ainda está rolando?", que funciona: quem visita vota e
-// vê a resposta. Nada sai daqui; é só a demonstração.
+// chegando como numa conversa (referência: agentes.chat). No alto, a pílula do
+// topo do app (P2), com o pulso da cidade trocando a cada ~9 s; o post aparece
+// depois de "alguém está postando", com o cabeçalho do story do app; por fim
+// vem a pergunta "Ainda está rolando?", que funciona: quem visita vota e vê a
+// resposta. Embaixo, o nível como no botão da conta: o Olheiro com o anel de
+// XP. Nada sai daqui; é só a demonstração.
 const CICLO_MS = 9000;
 const DIGITA_MS = 1300;
 
@@ -32,29 +37,51 @@ export default function HeroNoite() {
     const io = new IntersectionObserver(([e]) => (visivel = e.isIntersecting));
     if (el) io.observe(el);
     const i = setInterval(() => {
-      if (visivel && !lpPaused()) setAviso((n) => (n + 1) % t.alerts.length);
+      if (visivel && !lpPaused()) setAviso((n) => (n + 1) % t.pulse.length);
     }, CICLO_MS);
     return () => (clearTimeout(d), clearInterval(i), io.disconnect());
-  }, [t.alerts.length]);
+  }, [t.pulse.length]);
 
-  const [titulo, onde] = t.alerts[aviso];
+  const [cat, titulo, linha] = t.pulse[aviso];
 
   return (
     <div ref={ref} className="lp-ceu-cards" role="group" aria-label={t.label}>
       <div className="lp-flutua lp-ceu-aviso-casca" style={{ "--d": "0s" } as CSSProperties}>
-        <div key={aviso} className="lp-ceu-aviso lp-tilt" aria-live="polite">
-          <span className="lp-ceu-icone" aria-hidden="true">!</span>
-          <div className="flex min-w-0 flex-col">
-            <strong className="text-[13px]">{titulo}</strong>
-            <span className="text-xs text-[#5b6480]">{onde}</span>
+        <div className="lp-ceu-pilula">
+          <Mark size={28} className="shrink-0" />
+          <span className="lp-ceu-pilula-viu">viu</span>
+          <span className="h-7 w-px shrink-0 bg-white/20" aria-hidden="true" />
+          <div key={aviso} className="lp-ceu-pulso" aria-live="polite">
+            <span
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border-[1.5px]"
+              style={{ borderColor: severityVar(cat), color: severityVar(cat), background: `color-mix(in oklab, ${severityVar(cat)} 18%, transparent)` }}
+              aria-hidden="true"
+            >
+              <CategoryIcon category={cat} width="17" height="17" />
+            </span>
+            <span className="flex min-w-0 flex-col gap-[3px] leading-none">
+              <strong className="truncate text-[15px]">{titulo}</strong>
+              <span className="truncate text-xs font-bold text-[var(--luz)]">{linha}</span>
+            </span>
           </div>
+          <span className="lp-ceu-pilula-sino" aria-label={t.alerts} role="img">
+            <BellIcon width="18" height="18" />
+          </span>
+          <span className="lp-ceu-pilula-conta" aria-label={t.account} role="img">
+            <Olheiro nivel={1} tam={16} className="mt-0.5" />
+          </span>
         </div>
       </div>
 
       <article className="lp-flutua lp-ceu-post lp-tilt" style={{ "--d": "0.5s" } as CSSProperties}>
         <div className="flex items-center gap-2 text-[13px] font-bold">
-          <span className="text-[#8a93ad]">#</span>
-          {t.channel}
+          <span
+            className="grid h-7 w-7 place-items-center rounded-full border-[1.5px] border-[#c62a2a] bg-[#c62a2a]/10 text-[#c62a2a]"
+            aria-hidden="true"
+          >
+            <CategoryIcon category="alagamento" width="14" height="14" />
+          </span>
+          {t.category}
           <span className="ml-auto flex items-center gap-1.5 text-[11px] font-semibold text-[#c62a2a]">
             <span className="lp-ponto lp-ponto-eco" />
             {t.now}
@@ -74,10 +101,12 @@ export default function HeroNoite() {
           <div className="lp-msg-entra flex flex-col gap-3">
             <img src="/landing/alagamento.svg" alt={t.photo} width={480} height={260} className="lp-ceu-foto" />
             <div className="flex items-start gap-2.5">
-              <span className="lp-ceu-avatar" aria-hidden="true">?</span>
+              <span className="lp-ceu-avatar" aria-hidden="true">
+                <Olheiro nivel={1} tam={18} className="mt-1" />
+              </span>
               <div className="flex min-w-0 flex-col gap-0.5">
                 <span className="text-[13px] font-bold">
-                  {t.anon} <span className="font-medium text-[#8a93ad]">21:02</span>
+                  {t.anon} <span className="font-medium text-[#5b6480]">· {t.near}</span>
                 </span>
                 <span className="text-sm leading-snug">{t.text}</span>
               </div>
@@ -110,14 +139,22 @@ export default function HeroNoite() {
       </article>
 
       <div className="lp-flutua lp-ceu-nivel lp-tilt" style={{ "--d": "1s" } as CSSProperties}>
-        <div className="flex justify-between gap-3 text-xs">
-          <strong>{t.level}</strong>
-          <span className="lp-num text-[#5b6480]">340/400</span>
+        {/* o nível como no botão da conta do app: o Olheiro com o anel de XP */}
+        <span className="relative grid h-12 w-12 shrink-0 place-items-center" aria-hidden="true">
+          <svg viewBox="0 0 48 48" className="absolute inset-0">
+            <circle cx="24" cy="24" r="24" fill="#ffd27a" />
+            <circle cx="24" cy="24" r="21" fill="none" stroke="#0a1230" strokeOpacity="0.15" strokeWidth="3.5" />
+            <circle className="lp-xp-anel" cx="24" cy="24" r="21" fill="none" stroke="#0a1230" strokeWidth="3.5" pathLength={100} strokeDasharray="85 100" strokeLinecap="round" transform="rotate(-90 24 24)" />
+          </svg>
+          <Olheiro nivel={1} tam={19} className="relative mt-0.5" />
+        </span>
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="flex items-baseline justify-between gap-2">
+            <strong className="text-[13px]">{t.level}</strong>
+            <span className="lp-num text-[11px] text-[#5b6480]">340/400</span>
+          </span>
+          <span className="text-xs text-[#5b6480]">{t.left}</span>
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-[#e9edf8]">
-          <div className="lp-xp-enche h-full rounded-full bg-[#2f56b8]" style={{ width: "85%" }} />
-        </div>
-        <span className="text-xs text-[#5b6480]">{t.left}</span>
       </div>
     </div>
   );

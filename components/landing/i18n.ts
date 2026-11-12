@@ -1,5 +1,6 @@
 import type { BadgeId } from "@/lib/progress";
 import { CITY } from "@/lib/city";
+import type { Category } from "@/lib/categories";
 import type { ShopKind } from "./scenes";
 import type { DayEvent } from "./scenes";
 
@@ -8,6 +9,8 @@ import type { DayEvent } from "./scenes";
 export type Lang = "pt" | "en";
 
 type Card = [string, string];
+// as categorias que o pulso do herói mostra (as mesmas do app)
+type PulseCat = Extract<Category, "alagamento" | "transito" | "evento">;
 type Step = { tag: string; h: string; p: string };
 type Badge = { name: string; tiers: string[] };
 
@@ -68,17 +71,19 @@ const pt = {
   },
   heroCards: {
     label: "Exemplo do app",
-    alert: "Alagamento a 400 m de você",
-    alertWhere: "agora · Vila Rio Branco",
-    alerts: [
-      ["Alagamento a 400 m de você", "agora · Vila Rio Branco"],
-      ["Trânsito parado a 600 m", "há 1 min · Av. Peixoto Gomide"],
-      ["Show começando na praça", "há 3 min · Praça Duque de Caxias"],
-    ] as [string, string][],
+    // o pulso da cidade, como na pílula do topo do app: categoria, título e linha
+    pulse: [
+      ["alagamento", "Alagamento", "agora · 12 no ar"],
+      ["transito", "Trânsito", "há 1 min · 12 no ar"],
+      ["evento", "Evento", "há 3 min · 12 no ar"],
+    ] as [PulseCat, string, string][],
+    alerts: "Alertas perto de você",
+    account: "Minha conta",
     typing: "alguém está postando",
-    channel: "vila-rio-branco",
+    category: "Alagamento",
     now: "Agora",
-    anon: "Anônimo",
+    anon: "Olheiro",
+    near: "250 m de você",
     text: "Rua da rodoviária encheu, carro não passa.",
     photo: "Ilustração de uma rua alagada com um carro parado",
     ask: "Ainda está rolando?",
@@ -371,17 +376,18 @@ const en: Dict = {
   },
   heroCards: {
     label: "App example",
-    alert: "Flooding 400 m from you",
-    alertWhere: "now · Vila Rio Branco",
-    alerts: [
-      ["Flooding 400 m from you", "now · Vila Rio Branco"],
-      ["Traffic stopped 600 m away", "1 min ago · Av. Peixoto Gomide"],
-      ["Show starting in the square", "3 min ago · Praça Duque de Caxias"],
-    ] as [string, string][],
+    pulse: [
+      ["alagamento", "Flooding", "now · 12 live"],
+      ["transito", "Traffic", "1 min ago · 12 live"],
+      ["evento", "Event", "3 min ago · 12 live"],
+    ] as [PulseCat, string, string][],
+    alerts: "Alerts near you",
+    account: "My account",
     typing: "someone is posting",
-    channel: "vila-rio-branco",
+    category: "Flooding",
     now: "Now",
-    anon: "Anonymous",
+    anon: "Scout",
+    near: "250 m from you",
     text: "The street by the bus station flooded, cars can't get through.",
     photo: "Illustration of a flooded street with a stuck car",
     ask: "Still happening?",
